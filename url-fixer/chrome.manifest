@@ -1,0 +1,24 @@
+content url-fixer   jar:chrome/url-fixer.jar!/content/
+skin    url-fixer   classic         jar:chrome/url-fixer.jar!/skin/
+
+locale	url-fixer	ca-AD	jar:chrome/url-fixer.jar!/locale/ca-AD/
+#locale	url-fixer	cs-CZ	jar:chrome/url-fixer.jar!/locale/cs-CZ/
+#locale	url-fixer	da-DK	jar:chrome/url-fixer.jar!/locale/da-DK/
+#locale	url-fixer	de-DE	jar:chrome/url-fixer.jar!/locale/de-DE/
+locale	url-fixer	en-US	jar:chrome/url-fixer.jar!/locale/en-US/
+#locale	url-fixer	es-ES	jar:chrome/url-fixer.jar!/locale/es-ES/
+locale	url-fixer	fi-FI	jar:chrome/url-fixer.jar!/locale/fi-FI/
+locale	url-fixer	fr-FR	jar:chrome/url-fixer.jar!/locale/fr-FR/
+#locale	url-fixer	he-IL	jar:chrome/url-fixer.jar!/locale/he-IL/
+locale	url-fixer	it-IT	jar:chrome/url-fixer.jar!/locale/it-IT/
+locale	url-fixer	ja-JP	jar:chrome/url-fixer.jar!/locale/ja-JP/
+locale	url-fixer	ko-KR	jar:chrome/url-fixer.jar!/locale/ko-KR/
+locale	url-fixer	nl-NL	jar:chrome/url-fixer.jar!/locale/nl-NL/
+#locale	url-fixer	pl-PL	jar:chrome/url-fixer.jar!/locale/pl-PL/
+#locale	url-fixer	pt-BR	jar:chrome/url-fixer.jar!/locale/pt-BR/
+#locale	url-fixer	ru-RU	jar:chrome/url-fixer.jar!/locale/ru-RU/
+#locale	url-fixer	tr-TR	jar:chrome/url-fixer.jar!/locale/tr-TR/
+locale	url-fixer	uk-UA	jar:chrome/url-fixer.jar!/locale/uk-UA/
+#locale	url-fixer	zh-CN	jar:chrome/url-fixer.jar!/locale/zh-CN/
+
+overlay		chrome://browser/content/browser.xul				chrome://url-fixer/content/overlay.xul

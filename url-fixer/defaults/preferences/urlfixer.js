@@ -1,0 +1,1 @@
+pref("extensions.url-fixer.askFirst", false);
