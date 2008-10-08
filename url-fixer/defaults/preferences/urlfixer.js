@@ -1,1 +1,1 @@
-pref("extensions.url-fixer.askFirst", false);
+pref("extensions.url-fixer.askFirst", true);

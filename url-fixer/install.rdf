@@ -5,11 +5,11 @@
   <RDF:Description RDF:about="rdf:#$.LZDy2"
                    em:id="{a463f10c-3994-11da-9945-000d60ca027b}"
                    em:minVersion="1.0"
-                   em:maxVersion="1.1.*" />
+                   em:maxVersion="2.*" />
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="{0fa2149e-bb2c-4ac2-a8d3-479599819475}"
                    em:name="URL Fixer"
-                   em:version="1.4.3"
+                   em:version="1.4.4"
                    em:description="Fixes common misspellings in URLs entered in the address bar."
                    em:creator="Christopher Finke"
                    em:iconURL="chrome://url-fixer/skin/icon.gif"
@@ -19,6 +19,6 @@
   </RDF:Description>
   <RDF:Description RDF:about="rdf:#$VLZDy2"
                    em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-                   em:minVersion="1.5"
-                   em:maxVersion="3.0b4" />
+                   em:minVersion="2.0"
+                   em:maxVersion="3.1b1pre" />
 </RDF:RDF>

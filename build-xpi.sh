@@ -16,3 +16,4 @@ cd ../
 zip -rq ../url-fixer.xpi *
 cd ../
 rm -rf .tmp_xpi_dir/
+cp url-fixer.xpi ~/Desktop/

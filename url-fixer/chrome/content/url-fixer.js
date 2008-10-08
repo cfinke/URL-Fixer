@@ -203,6 +203,9 @@ var URLFIXER = {
 						return this.oldOnTextEntered();
 					}
 				}
+				else if (justCorrect) {
+					return true;
+				}
 				else {
 					return this.oldOnTextEntered();
 				}
