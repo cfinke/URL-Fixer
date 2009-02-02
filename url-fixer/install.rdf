@@ -2,23 +2,28 @@
 <RDF:RDF xmlns:em="http://www.mozilla.org/2004/em-rdf#"
          xmlns:NC="http://home.netscape.com/NC-rdf#"
          xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <RDF:Description RDF:about="rdf:#$.LZDy2"
-                   em:id="{a463f10c-3994-11da-9945-000d60ca027b}"
-                   em:minVersion="1.0"
-                   em:maxVersion="2.*" />
+	  <RDF:Description RDF:about="rdf:#$.LZDy2"
+	                   em:id="{a463f10c-3994-11da-9945-000d60ca027b}"
+	                   em:minVersion="1.0"
+	                   em:maxVersion="2.*" />
+					  <RDF:Description RDF:about="rdf:#$.RZDy2"
+					                   em:id="{a23983c0-fd0e-11dc-95ff-0800200c9a66}"
+					                   em:minVersion="0.8"
+					                   em:maxVersion="1.0.*" />
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="{0fa2149e-bb2c-4ac2-a8d3-479599819475}"
                    em:name="URL Fixer"
-                   em:version="1.4.4"
+                   em:version="1.5"
                    em:description="Fixes common misspellings in URLs entered in the address bar."
                    em:creator="Christopher Finke"
                    em:iconURL="chrome://url-fixer/skin/icon.gif"
                    em:homepageURL="http://www.chrisfinke.com/addons/url-fixer/">
     <em:targetApplication RDF:resource="rdf:#$VLZDy2"/>
     <em:targetApplication RDF:resource="rdf:#$.LZDy2"/>
+    <em:targetApplication RDF:resource="rdf:#$.RZDy2"/>
   </RDF:Description>
   <RDF:Description RDF:about="rdf:#$VLZDy2"
                    em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
                    em:minVersion="2.0"
-                   em:maxVersion="3.1b1pre" />
+                   em:maxVersion="3.1b2pre" />
 </RDF:RDF>
