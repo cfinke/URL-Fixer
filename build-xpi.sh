@@ -18,9 +18,6 @@ cd ../
 zip -rq ../url-fixer.xpi *
 cd ../
 
-rm -rf ~/Library/Application\ Support/Fennec/Profiles/uh6wew3f.default/extensions/\{0fa2149e-bb2c-4ac2-a8d3-479599819475\}/*
-cp -r .tmp_xpi_dir/* ~/Library/Application\ Support/Fennec/Profiles/uh6wew3f.default/extensions/\{0fa2149e-bb2c-4ac2-a8d3-479599819475\}/
-
 rm -rf .tmp_xpi_dir/
 cp url-fixer.xpi ~/Desktop/
 
