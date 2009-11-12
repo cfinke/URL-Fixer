@@ -62,11 +62,14 @@ var URLFIXER = {
 					if (firstSpace != -1 && firstSlash == -1) {
 						goAhead = false;
 					}
-				
+					
 					if (goAhead) {
 						// Determine if the text starts with a keyword
-						if (typeof getShortcutOrURI != 'undefined' && this.value != getShortcutOrURI(this.value, {})){
-							goAhead = true;
+						
+						if (typeof getShortcutOrURI != 'undefined') {
+							if (getShortcutOrURI(this.value, {}) != this.value) {
+								goAhead = false;
+							}
 						}
 					}
 					
