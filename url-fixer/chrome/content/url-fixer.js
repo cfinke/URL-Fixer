@@ -9,6 +9,23 @@ var URLFIXER = {
 		this.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.url-fixer.");
 		this.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.prefs.addObserver("", this, false);
+		
+		var version = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager).getItemForID("{0fa2149e-bb2c-4ac2-a8d3-479599819475}").version;
+		
+		if (this.prefs.getCharPref("version") != version) {
+			this.prefs.setCharPref("version", version);
+			
+			if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
+				Browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?version=" + version, true);
+			}
+			else {
+				var browser = getBrowser();
+			
+				setTimeout(function (browser) {
+					browser.selectedTab = browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version);
+				}, 3000, browser);
+			}
+		}
 	},
 	
 	observe: function(subject, topic, data) {
@@ -90,8 +107,8 @@ var URLFIXER = {
 							{find: "^.?(https|http|irc|ftp).?://", "replace" : "$1://"},
 						
 							// Only two of the three w's
-							{find: "^w{2,4}(\\.)", "replace" : "www."},
-							{find: "//ww(\\.)", "replace" : "//www."},
+							{find: "^w{2,4}(\\.)([^\\.]+\\..*)$", "replace" : "www.$2"},
+							{find: "//ww(\\.)([^\\.]+\\..*)$", "replace" : "//www.$2"},
 						
 							// Missing the dot
 							{find: "([^\\.])(com|net|org|edu|mil|gov|aero|biz|coop|info|museum|name|pro|cat|jobs|mobi|travel)$", replace : "$1.$2"},
