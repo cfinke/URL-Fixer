@@ -14,6 +14,7 @@ cd .tmp_xpi_dir/chrome/
 zip -rq ../url-fixer.jar *
 rm -rf *
 mv ../url-fixer.jar ./
+
 cd ../
 zip -rq ../url-fixer.xpi *
 cd ../
