@@ -15,16 +15,15 @@ var URLFIXER = {
 		if (this.prefs.getCharPref("version") != version) {
 			this.prefs.setCharPref("version", version);
 			
-			if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
-				Browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?version=" + version, true);
-			}
-			else {
-				var browser = getBrowser();
-			
-				setTimeout(function (browser) {
+			setTimeout(function () {
+				if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
+					Browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version, true);
+				}
+				else {
+					var browser = getBrowser();
 					browser.selectedTab = browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version);
-				}, 3000, browser);
-			}
+				}
+			}, 3000);
 		}
 	},
 	
