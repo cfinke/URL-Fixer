@@ -3,7 +3,7 @@
 	<Description about="urn:mozilla:install-manifest">
 		<em:id>{0fa2149e-bb2c-4ac2-a8d3-479599819475}</em:id>
 		<em:name>URL Fixer</em:name>
-		<em:version>1.6</em:version>
+		<em:version>1.6.1</em:version>
 		<em:description>Fixes common typos in URLs entered in the address bar.</em:description>
 		<em:creator>Christopher Finke</em:creator>
 		<em:homepageURL>http://www.chrisfinke.com/addons/url-fixer/</em:homepageURL>
@@ -15,7 +15,7 @@
 			<Description>
 				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
 				<em:minVersion>2.0</em:minVersion>
-				<em:maxVersion>3.6.*</em:maxVersion>
+				<em:maxVersion>4.0b2pre</em:maxVersion>
 			</Description>
 		</em:targetApplication>
 

@@ -10,21 +10,7 @@ var URLFIXER = {
 		this.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.prefs.addObserver("", this, false);
 		
-		var version = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager).getItemForID("{0fa2149e-bb2c-4ac2-a8d3-479599819475}").version;
-		
-		if (this.prefs.getCharPref("version") != version) {
-			this.prefs.setCharPref("version", version);
-			
-			setTimeout(function () {
-				if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
-					Browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version, true);
-				}
-				else {
-					var browser = getBrowser();
-					browser.selectedTab = browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version);
-				}
-			}, 3000);
-		}
+		URLFIXER.showFirstRun();
 	},
 	
 	observe: function(subject, topic, data) {
@@ -40,6 +26,60 @@ var URLFIXER = {
 				}
 			break;
 		}
+	},
+	
+	getVersion : function (callback) {
+		var addonId = "{0fa2149e-bb2c-4ac2-a8d3-479599819475}";
+		
+		if ("@mozilla.org/extensions/manager;1" in Components.classes) {
+			// < Firefox 4
+			var version = Components.classes["@mozilla.org/extensions/manager;1"]
+				.getService(Components.interfaces.nsIExtensionManager).getItemForID(addonId).version;
+			
+			callback(version);
+		}
+		else {
+			// Firefox 4.
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");  
+			
+			AddonManager.getAddonByID(addonId, function (addon) {
+				callback(addon.version);
+			});
+		}
+	},
+	
+	showFirstRun : function () {
+		function isMajorUpdate(version1, version2) {
+			if (!version1) {
+				return true;
+			}
+			else {
+				var oldParts = version1.split(".");
+				var newParts = version2.split(".");
+		
+				if (newParts[0] != oldParts[0] || newParts[1] != oldParts[1]) {
+					return true;
+				}
+			}
+			
+			return false;
+		}
+		
+		function doShowFirstRun(version) {
+			if (isMajorUpdate(URLFIXER.prefs.getCharPref("version"), version)) {
+				if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
+					Browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version, true);
+				}
+				else {
+					var browser = getBrowser();
+					browser.selectedTab = browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version);
+				}
+			}
+			
+			URLFIXER.prefs.setCharPref("version", version);
+		}
+		
+		URLFIXER.getVersion(doShowFirstRun);
 	},
 	
 	addTypoFixer : function() {
