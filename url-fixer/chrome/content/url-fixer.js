@@ -129,6 +129,12 @@ var URLFIXER = {
 						}
 					}
 					
+					if (goAhead) {
+						if (this.value.indexOf("moz-action:") == 0) {
+							goAhead = false;
+						}
+					}
+					
 					if (goAhead){
 						var res = [
 							{find : ";//", replace : "://"},
