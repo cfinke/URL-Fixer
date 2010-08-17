@@ -68,7 +68,8 @@ var URLFIXER = {
 		function doShowFirstRun(version) {
 			if (isMajorUpdate(URLFIXER.prefs.getCharPref("version"), version)) {
 				if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
-					Browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version, true);
+					// Browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version, true);
+					// No firstrun on Fennec.
 				}
 				else {
 					var browser = getBrowser();
