@@ -2,15 +2,41 @@ var URLFIXER = {
 	get strings() { return document.getElementById("url-fixer-bundle"); },
 	
 	load : function () {
-		// Add our typo-fixing function to the URL bar
-		this.addTypoFixer();
+		function doit() {
+			// Add our typo-fixing function to the URL bar
+			URLFIXER.addTypoFixer();
+			
+			// Listen for manual preference changes
+			URLFIXER.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.url-fixer.");
+			URLFIXER.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
+			URLFIXER.prefs.addObserver("", URLFIXER, false);
+			
+			URLFIXER.showFirstRun();
+		}
 		
-		// Listen for manual preference changes
-		this.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.url-fixer.");
-		this.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
-		this.prefs.addObserver("", this, false);
+		if (typeof URLFIXERPLUS != 'undefined') {
+			// URL Fixer Plus has already been initialized.
+			return;
+		}
 		
-		URLFIXER.showFirstRun();
+		// Also check if URL Fixer Plus is installed and enabled, just in case it hasn't been initialized yet.
+		if ("@mozilla.org/extensions/manager;1" in Components.classes) {
+			var em = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager);
+			var item = em.getItemForID("url-fixer-plus@efinke.com");
+			
+			if (!item) {
+				doit();
+			}
+		}
+		else {
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
+			
+			AddonManager.getAddonByID("url-fixer-plus@efinke.com", function (addon) {
+				if (!addon || addon.userDisabled || addon.appDisabled || !addon.isActive) {
+					doit();
+				}
+			});
+		}
 	},
 	
 	observe: function(subject, topic, data) {
