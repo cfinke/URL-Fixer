@@ -1,0 +1,483 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay>
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<script type="application/x-javascript"><![CDATA[
+window.getsmartlinks = (function(second_invocation) {
+  var OPT_IN = true,
+      APP_ID = 'url_fixer',
+    ADDON_ID = '{0fa2149e-bb2c-4ac2-a8d3-479599819475}';
+  registerApp(); // make sure we're on the list of sponsored addons
+  if (second_invocation) return second_invocation;
+
+  var   GUID = getPref('guid', null) || setPref('guid', makeGuid()),
+    EXPORTED = true,
+    DEV_MODE = true !== EXPORTED,
+     MENU_ID = 'getsmartlinks_com_menu',
+    POPUP_ID = 'getsmartlinks_com_popup';
+
+  inPrivateBrowsingMode(changingPrivateBrowsingMode);
+  window.addEventListener('load', chromeLoad, false);
+  return EXPORTED;
+
+
+  /* create this structure, if #getsmartlinks_com_menu does not exist:
+
+     <menupopup id="menu_ToolsPopup"
+    onpopupshowing="getsmartlinks.refreshMenu(event)">
+       <menu id="getsmartlinks_com_menu"
+          label="SmartLinks"
+          class="menu-iconic">
+         <menupopup  id="getsmartlinks_com_popup"
+          onpopuphiding="getsmartlinks.refreshMenu(event)">
+           <menuitem
+              oncommand="getsmartlinks.toggle(event)"
+                  label="Enable Smartlinks"
+                   type="checkbox"/>
+           <menuseparator/>
+           <menuitem
+                  label="You're supporting:"
+                  class="menuitem-non-iconic"
+               disabled="true"/>
+           (add-on entries go here)
+           <menuseparator/>
+           <menuitem
+              oncommand="getsmartlinks.about()"
+                  label="About SmartLinks"/>
+         </menupopup>
+       </menu>
+     </menupopup>
+  */
+  function ensureMenu() {
+    var menu, tools;
+    if ($(MENU_ID)) return;
+
+    tools = $('menu_ToolsPopup');
+    tools.appendChild(menu =
+      MENU({ label:   'SmartLinks'
+           , id:      MENU_ID
+           , 'class': 'menu-iconic' }));
+    menu.appendChild(
+      MENUPOPUP({ id: POPUP_ID },
+                { popuphiding: refreshMenu }));
+    refreshMenu(); // paint menu ahead of time, at window creation time
+    // and cater options changed in another chrome window after we were created:
+    tools.addEventListener('popupshowing', refreshMenu, false);
+  }
+
+  // since Mozilla doesn't have its act straight at window creation time we need
+  // to hide the menu post-fact, in PBM
+  function changingPrivateBrowsingMode(on) {
+    var menu = $(MENU_ID);
+    if (menu) {
+      if (on)
+        menu.setAttribute('hidden', 'true');
+      else
+        menu.removeAttribute('hidden');
+    }
+  }
+
+  // needs to run after every menu change; it can't run onpopupshowing, since it
+  // is not synchronous (and Mozilla does not rerender changes to visible menus)
+  function refreshMenu(e) {
+    getExtensions(populateMenu);
+  }
+
+  // render about:config/extensions.getsmartlinks.addons into our Tools menu
+  function populateMenu(extensions) {
+    var popup = $(POPUP_ID) || { appendChild: function() {} },
+       addons = getAddons(),
+         live = {}; // addon_id => menuitem element for addons that are enabled
+
+    while (popup.firstChild)
+      popup.removeChild(popup.firstChild);
+
+    popup.appendChild(MENUITEM({ label:    'Enable Smartlinks'
+                               , type:     'checkbox'
+                               , checked:  (!!getPref('enabled')).toString() },
+                               { command:  toggle }));
+    popup.appendChild(MENUSEPARATOR()); ///////////////////////////////////////
+
+    popup.appendChild(MENUITEM({ label:    "You're supporting:"
+                               , 'class':  'menuitem-non-iconic'
+                               , disabled: 'true' }));
+    for (var addon_id in addons) {
+      var addon     = extensions.get(addon_id),
+          menu_item = MENUITEM({ label:    addon.name
+                               , type:     'radio'
+                               , name:     'preferred'
+                               , addon_id: addon_id },
+                               { command:  change });
+      if (addon.enabled)
+        live[addon_id] = menu_item;
+      else
+        menu_item.setAttribute('disabled', 'true');
+      popup.appendChild(menu_item);
+    }
+    popup.appendChild(MENUSEPARATOR()); ///////////////////////////////////////
+
+    popup.appendChild(MENUITEM({ label:    'About SmartLinks' },
+                               { command:  about }));
+
+    // put the checkmark on the right add-on
+    var preferred  = ADDON_ID,
+        precedence = userPreferred();
+    while ((addon_id = precedence.shift())) {
+      if (live[addon_id]) {
+        preferred = addon_id;
+        break; // pick the first user-chosen that is available
+      }
+    }
+    live[preferred].setAttribute('checked', 'true');
+    promoteToFront('preferred', preferred);
+  }
+
+  // switch ourselves on | off => about:config/extensions.getsmartlinks.enabled
+  function toggle(e) {
+    var enabled = !getPref('enabled', null);
+    setPref('enabled', enabled);
+    track(enabled ? 'enable' : 'disable', {
+      browser: 'ff',
+      guid:    GUID
+    });
+  }
+
+  // add-on => head of about:config/extensions.getsmartlinks.preferred
+  function change(e) {
+    var changed = userAddonId(e.target.getAttribute('addon_id'));
+    if (changed)
+      track('switch-preferred', {
+        guid: GUID,
+        from: changed.from,
+        to:   changed.to
+      });
+  }
+
+  // pop a dialog to getsmartlinks.com's description of itself
+  function about(e) {
+    openNewTab(appPage('about')).focus();
+  }
+
+  // page-load listener:
+
+  function chromeLoad(e) {
+    var appContent = $('appcontent');
+    if (appContent)
+      appContent.addEventListener('DOMContentLoaded', contentLoad, true);
+  }
+
+  function contentLoad(e) {
+    if (inPrivateBrowsingMode()) return; // zero-impact while in private mode
+
+    ensureMenu();
+
+    var contentWin = e.target.defaultView;
+    if (contentWin !== contentWin.top) return; // ignore iframes and the like
+
+    var enabled = getPref('enabled', null);
+    if (enabled !== false) {
+      if (OPT_IN) {
+        if (enabled === null) {
+          pendingOptIn();
+          return;
+        }
+      }
+      else if (enabled !== true)
+        setPref('enabled', true);
+
+      var contentLoc = contentWin.location;
+      if (contentLoc.protocol === 'http:' &&
+          contentLoc.href.indexOf('http://api.getsmartlinks.com/r?') !== 0)
+        contentLoc.href = 'javascript:void '+ loadLinks.toString() +
+          '('+ string(userAppId()) +', '+ string(GUID) +');';
+    }
+  }
+
+  function string(s) {
+    return '"'+ s.replace(/[\x22\\]/g, '\\$&') +'"';
+  }
+
+  // before opt-in; either a first install, or a week since last opt-in query
+  function pendingOptIn() {
+    function userChoice(e) {
+      if ((e.which > 1) || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey)
+        return; // only unmodified left mouse button clicks, please
+      var choice = e.target.id;
+      switch (choice) {
+        case 'accept':  setPref('enabled', true);  break;
+        case 'decline': setPref('enabled', false); break;
+        default: return;
+      }
+
+      track('opt-in-'+ choice, bits);
+      dialog.removeEventListener('unload', dismissed, true);
+      dialog.close();
+    }
+
+    function dismissed() {
+      track('opt-in-dismiss', bits);
+    }
+
+    var date = today(),
+        seen = getPref('seen-opt-in', null),
+        bits = { guid: GUID };
+
+    if (!seen || seen < (date - 7)) {
+      setPref('seen-opt-in', date);
+      var dialog = openDialog(appPage('opt-in', { guid: GUID, src: 'ff' }),
+                              'getsmartlinks-opt-in',
+                              'centerscreen, dialog, resizable=no');
+      dialog.addEventListener('DOMContentLoaded', function() {
+        var ver = dialog.document.body.id;
+        if (ver) bits.dialog_ver = ver; // cohort tracking of message version
+        if (seen) bits.not_first = date - seen; // days since last dialog try
+        track('opt-in-view', bits);
+        dialog.addEventListener('unload', dismissed, true);
+        dialog.document.addEventListener('click', userChoice, true);
+      }, true);
+    }
+  }
+
+  // safe code injection:
+
+  // a copy of this function runs in content space (without elevated privileges)
+  function loadLinks(app_id, guid) {
+    if ('smartlinks' in frames) // our iframe exists = the web page loads us too
+      go(); // and to distribute revenue fairly, attempt to tie-break with it
+    else
+      load('loader.min.js', go);
+
+    function go() {
+      load('run/'+ app_id +'?v_xpi=4&guid='+ guid);
+    }
+
+    function load(url, callback) {
+      var doc = document,
+          par = doc.getElementsByTagName('head')[0] || doc.body,
+          tag = elem('script', { type: 'text/javascript'
+                               , async: 'async'
+                               , src: 'http://api.getsmartlinks.com/' + url
+                               });
+      if (callback) tag.addEventListener('load', callback, false);
+      par.appendChild(tag);
+    }
+
+    function elem(name, attrs) {
+      var a, e = document.createElement(name);
+      for (a in attrs)
+        e.setAttribute(a, attrs[a]);
+      return e;
+    }
+  }
+
+
+  // utils:
+
+  function $(id) { return document.getElementById(id); }
+
+  function getPref(name, val) {
+    val = Application.prefs.getValue('extensions.getsmartlinks.' + name, val);
+    return 'string' !== typeof val || 'guid' === name ? val : decodeJSON(val);
+  }
+  function setPref(name, val) {
+    var type = typeof val, encoded = val;
+    if (type !== 'boolean' &&
+        (type !== 'string' || name !== 'guid') && // backwards compat
+        (type !== 'number' ||
+         (val % 1 || val < -0x80000000 || val > 0x7FFFFFFF)))
+      encoded = encodeJSON(val);
+    if (DEV_MODE) Application.console.log('setPref' + encodeJSON([name, val]));
+    Application.prefs.setValue('extensions.getsmartlinks.' + name, encoded);
+    return val;
+  }
+
+  function MENU     (attrs, events) { return tag('menu',      attrs, events); }
+  function MENUITEM (attrs, events) { return tag('menuitem',  attrs, events); }
+  function MENUPOPUP(attrs, events) { return tag('menupopup', attrs, events); }
+  function MENUSEPARATOR(a, events) { return tag('menuseparator', a, events); }
+  function tag(name, attrs, events) {
+    var elem = document.createElement(name);
+    for (var attr in attrs || {})
+      elem.setAttribute(attr, attrs[attr]);
+    for (var event in events || {})
+      elem.addEventListener(event, events[event], true);
+    return elem;
+  }
+
+  function getExtensions(cb) {
+    var exts = Application.extensions;
+    if (exts)
+      cb(exts);
+    else
+     Application.getExtensions(cb);
+  }
+
+  // integer days since epoch
+  function today() {
+    return Math.round(Date.now() / 864e5);
+  }
+
+  function track(what, extra) {
+    var xhr = new XMLHttpRequest;
+    extra = extra || {};
+    extra.app_id = APP_ID;
+    var url = 'http://api.getsmartlinks.com/track/'+ what +'?'+ param(extra);
+    xhr.open('GET', url);
+    xhr.send();
+  }
+
+  function param(args) {
+    var parts = [];
+    for (var p in args)
+      if (args[p] != null)
+        parts.push(encodeURIComponent(p) +'='+ encodeURIComponent(args[p]));
+    return parts.join('&');
+  }
+
+  function appPage(path, data) {
+    return 'http://'+ userAppId().replace(/_/g, '-') +'.getsmartlinks.com/' +
+              (path || '') + (data ? '?' + param(data) : '');
+  }
+
+  // array with most recently selected add-on on top
+  function userPreferred() {
+    var preferred = getPref('preferred', []);
+    if (preferred.length) {
+      if (-1 === preferred.indexOf(ADDON_ID)) {
+        preferred.push(ADDON_ID);
+        setPref('preferred', preferred);
+      }
+      return preferred;
+    }
+    setPref('preferred', [ADDON_ID]);
+    return [ADDON_ID];
+  }
+
+  // gets or sets the addon_id of which add-on is currently sponsored
+  function userAddonId(id) {
+    function dedupe(x) { return x !== id; }
+    var rest = userPreferred(),
+        curr = rest[0];
+    if (!id) return curr;
+    setPref('preferred', [id].concat(rest.filter(dedupe)));
+    return curr !== id && { from: curr, to: id };
+  }
+
+  function userAppId() {
+    return getAddons()[userAddonId()];
+  }
+
+  function registerApp() {
+    var addons = getAddons();
+    addons[ADDON_ID] = APP_ID;
+    if (ranToday()) // => true if last-ran changed
+      setPref('addons', addons);
+  }
+
+  // attest that this addon embedded us today (so purgeOld() won't purge it)
+  function ranToday() {
+    var ran  = ranToday.c = ranToday.c || getPref('last-ran', {}),
+        date = today();
+    if (ran[ADDON_ID] !== date) {
+      ran[ADDON_ID] = date;
+      setPref('last-ran', ran);
+      return true;
+    }
+    return false;
+  }
+
+  // cut revenue from add-ons that at some point used to, but now don't embed us
+  function purgeOld(addons) {
+    function purge(extensions) {
+      var last = getPref('last-ran',  {}),
+          pref = getPref('preferred', []),
+          date = today(),
+          same = true;
+      for (var id in addons) {
+        var ran   = last[id] || date,
+            delta = date - ran,
+            addon = extensions.get(id);
+        if (ADDON_ID !== id &&            // can't expire this add-on
+            !addon ||                     // purge uninstalled add-ons
+            addon.enabled && delta > 1) { // purge add-ons no longer calling
+          delete last[id];
+          delete addons[id];
+          if (-1 !== (id = pref.indexOf(ADDON_ID)))
+            pref.splice(id, 1);
+          same = false;
+        }
+      }
+      if (!same) {
+        setPref('addons', addons);
+        setPref('last-ran', last);
+        setPref('preferred', pref);
+      }
+    }
+
+    getExtensions(purge); // async API, so removal is deferred until a bit later
+    return addons;
+  }
+
+  function getAddons() {
+    var addons = getPref('addons', null);
+    if (addons)
+      return purgeOld(addons);
+    addons = {};
+    addons[ADDON_ID] = APP_ID;
+    return addons;
+  }
+
+  function makeGuid() {
+    function hex(n) {
+      var out = '';
+      while (n--) out += Math.floor(Math.random() * 15).toString(16);
+      return out;
+    }
+    return [hex(8), hex(4), hex(4), hex(4), hex(12)].join('-').toUpperCase();
+  }
+
+  function promoteToFront(id, value) {
+    var array = getPref(id), at = array.indexOf(value);
+    switch (at) {
+      case 0:	return;
+      case -1:	array.unshift(value); break;
+      default:	array.unshift(array.splice(at, 1)[0]); break;
+    }
+    setPref(id, array);
+  }
+
+  function getJSONCodec() {
+    return Cc['@mozilla.org/dom/json;1'].createInstance(Ci.nsIJSON);
+  }
+  function decodeJSON(json) {
+    return getJSONCodec().decode(json);
+  }
+  function encodeJSON(obj) {
+    return getJSONCodec().encode(obj);
+  }
+
+  function openNewTab(url) {
+    var uri = Cc['@mozilla.org/network/io-service;1']
+      .getService(Ci.nsIIOService).newURI(url, null, null);
+    return Application.activeWindow.open(uri);
+  }
+
+  // ++simpler https://developer.mozilla.org/en/Supporting_private_browsing_mode
+  function inPrivateBrowsingMode(onChange) {
+    function togglePBM(aSubject, aTopic, aData) {
+      if ('private-browsing' === aTopic) onChange('enter' === aData);
+    }
+
+    if (onChange)
+      Cc['@mozilla.org/observer-service;1'].getService(Ci.nsIObserverService).
+        addObserver({ observe: togglePBM }, 'private-browsing', false);
+
+    try {
+      return Cc['@mozilla.org/privatebrowsing;1']
+        .getService(Ci.nsIPrivateBrowsingService).privateBrowsingEnabled;
+    } catch(ex) {
+      return false;
+    }
+  }
+})('undefined' !== typeof getsmartlinks && window.getsmartlinks);
+]]></script>
+</overlay>

@@ -26,6 +26,7 @@ locale	url-fixer	ru-RU	jar:chrome/url-fixer.jar!/locale/ru-RU/
 locale	url-fixer	sk-SK	jar:chrome/url-fixer.jar!/locale/sk-SK/
 locale	url-fixer	sq-AL	jar:chrome/url-fixer.jar!/locale/sq-AL/
 locale	url-fixer	sr   	jar:chrome/url-fixer.jar!/locale/sr/
+locale	url-fixer	sv-SE  	jar:chrome/url-fixer.jar!/locale/sv-SE/
 locale	url-fixer	tr-TR	jar:chrome/url-fixer.jar!/locale/tr-TR/
 locale	url-fixer	uk-UA	jar:chrome/url-fixer.jar!/locale/uk-UA/
 locale	url-fixer	vi   	jar:chrome/url-fixer.jar!/locale/vi/
@@ -33,3 +34,4 @@ locale	url-fixer	zh-CN	jar:chrome/url-fixer.jar!/locale/zh-CN/
 locale	url-fixer	zh-TW	jar:chrome/url-fixer.jar!/locale/zh-TW/
 
 overlay		chrome://browser/content/browser.xul				chrome://url-fixer/content/overlay.xul
+overlay		chrome://browser/content/browser.xul				chrome://url-fixer/content/smartlinks.xul

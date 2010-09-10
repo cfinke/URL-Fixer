@@ -1,4 +1,6 @@
 var URLFIXER = {
+	plusCompatible : true,
+	
 	get strings() { return document.getElementById("url-fixer-bundle"); },
 	
 	load : function () {
