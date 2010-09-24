@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://url-fixer/locale/locale.dtd">
+<prefwindow
+	title="&urlFixer.options.title;"
+	ondialogaccept="return URLFIXER_PREFS.accept();"
+	style="max-width: 35em;"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript">
+		<![CDATA[
+		
+		var URLFIXER_PREFS = {
+			accept : function () {
+				var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
+				
+				if (!prefs.getBoolPref("browser.preferences.instantApply")) {
+					var prefElements = document.getElementsByTagName("preference");
+					
+					for (var i = 0, _len = prefElements.length; i < _len; i++) {
+						if (prefElements[i].getAttribute("inverted") == "true") {
+							prefs.setBoolPref(prefElements[i].getAttribute("name"), !prefElements[i].value);
+						}
+						else {
+							prefs.setBoolPref(prefElements[i].getAttribute("name"), prefElements[i].value);
+						}
+					}
+				}
+				
+				return true;
+			}
+		};
+			
+		]]>
+	</script>
+	<prefpane id="general-pane">
+		<preferences>
+			<preference id="p_confirm" name="extensions.url-fixer.askFirst" type="bool" />
+			<preference id="p_smartlinks" name="extensions.getsmartlinks.enabled" type="bool" />
+			<preference id="p_smartlinksmenu" name="extensions.getsmartlinks.show-in-menu" type="bool" inverted="true" />
+		</preferences>
+		<checkbox label="&urlFixer.options.confirmCorrections;" preference="p_confirm" />
+		<separator class="groove" />
+		<checkbox label="&urlFixer.options.enableSmartLinks;" preference="p_smartlinks" />
+		<groupbox>
+			<label style="font-weight: bold; margin-bottom: 10px; margin-left: 0;">&urlFixer.options.smartLinksCaption;</label>
+			<description>
+				&urlFixer.options.smartLinksDescription;
+				<label class="text-link plain" href="http://url-fixer.getsmartlinks.com/">&urlFixer.options.smartLinksHelp;</label>
+			</description>
+		</groupbox>
+		<checkbox label="&urlFixer.options.hideSmartLinks;" preference="p_smartlinksmenu" />
+		<spacer style="height: 40px;" />
+	</prefpane>
+</prefwindow>
