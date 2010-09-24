@@ -13,7 +13,7 @@ var URLFIXER = {
 			URLFIXER.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
 			URLFIXER.prefs.addObserver("", URLFIXER, false);
 			
-			URLFIXER.showFirstRun();
+			setTimeout(URLFIXER.showFirstRun, 3000);
 		}
 		
 		if (typeof URLFIXERPLUS != 'undefined') {
@@ -78,6 +78,12 @@ var URLFIXER = {
 	
 	showFirstRun : function () {
 		function isMajorUpdate(version1, version2) {
+			if (version1 == version2) {
+				return false;
+			}
+			
+			return true;
+			
 			if (!version1) {
 				return true;
 			}
@@ -93,6 +99,10 @@ var URLFIXER = {
 			return false;
 		}
 		
+		function isUpdate() {
+			return URLFIXER.prefs.getCharPref("version");
+		}
+		
 		function doShowFirstRun(version) {
 			if (isMajorUpdate(URLFIXER.prefs.getCharPref("version"), version)) {
 				if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
@@ -101,7 +111,7 @@ var URLFIXER = {
 				}
 				else {
 					var browser = getBrowser();
-					browser.selectedTab = browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version);
+					browser.selectedTab = browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version + (isUpdate() ? "&update=1" : ""));
 				}
 			}
 			
