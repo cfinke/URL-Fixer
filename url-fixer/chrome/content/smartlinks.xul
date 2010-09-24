@@ -5,19 +5,34 @@
 window.getsmartlinks = (function(second_invocation) {
   var OPT_IN = true,
       APP_ID = 'url_fixer',
-    ADDON_ID = '{0fa2149e-bb2c-4ac2-a8d3-479599819475}';
+    ADDON_ID = '{0fa2149e-bb2c-4ac2-a8d3-479599819475}',
+    DEV_MODE = false,
+          Cc = Components.classes, Ci = Components.interfaces, // FF3.0 compat
+     PROMPTS = 'opt-in-prompts', SHOW_MENU = 'show-in-menu',
+      ACCEPT = 'accept', DECLINE = 'decline', DISMISS = 'dismiss',
+  SMARTLINKS = 'extensions.getsmartlinks.', ENABLED = 'enabled',
+     MENU_ID = 'getsmartlinks_com_menu', POPUP_ID = 'getsmartlinks_com_popup',
+       ask   = getPref(PROMPTS);
+  if (!ask) {
+    if (ask == false)
+      return ADDON_ID; // implies smartlink shut-down
+    else { // enable menu presence for new users, and v4 users that had opted in
+      setPref(PROMPTS, true);
+      setPref(SHOW_MENU, getPref('guid') ? getPref(ENABLED, false) : true);
+    }
+  }
   registerApp(); // make sure we're on the list of sponsored addons
   if (second_invocation) return second_invocation;
+  getExtensions(pickActive); // only needed once per window
 
-  var   GUID = getPref('guid', null) || setPref('guid', makeGuid()),
-    EXPORTED = true,
-    DEV_MODE = true !== EXPORTED,
-     MENU_ID = 'getsmartlinks_com_menu',
-    POPUP_ID = 'getsmartlinks_com_popup';
+  var GUID = getPref('guid', null) || setPref('guid', makeGuid());
 
-  inPrivateBrowsingMode(changingPrivateBrowsingMode);
+  inPrivateBrowsingMode(updateMenuVisibility);
   window.addEventListener('load', chromeLoad, false);
-  return EXPORTED;
+  try { // prolly not needed, but won't hurt
+    gBrowser.addEventListener('load', ensureMenu, false); // even do about:blank
+  } catch(e) {}
+  return ADDON_ID;
 
 
   /* create this structure, if #getsmartlinks_com_menu does not exist:
@@ -48,10 +63,9 @@ window.getsmartlinks = (function(second_invocation) {
      </menupopup>
   */
   function ensureMenu() {
-    var menu, tools;
-    if ($(MENU_ID)) return;
+    var menu = $(MENU_ID), tools = $('menu_ToolsPopup');
+    if (menu || !tools) return;
 
-    tools = $('menu_ToolsPopup');
     tools.appendChild(menu =
       MENU({ label:   'SmartLinks'
            , id:      MENU_ID
@@ -64,28 +78,28 @@ window.getsmartlinks = (function(second_invocation) {
     tools.addEventListener('popupshowing', refreshMenu, false);
   }
 
-  // since Mozilla doesn't have its act straight at window creation time we need
-  // to hide the menu post-fact, in PBM
-  function changingPrivateBrowsingMode(on) {
+  // shows or hides menu in PBM or at show-in-menu change time
+  function updateMenuVisibility() {
     var menu = $(MENU_ID);
     if (menu) {
-      if (on)
-        menu.setAttribute('hidden', 'true');
-      else
+      if (getPref(PROMPTS) && getPref(SHOW_MENU) && !inPrivateBrowsingMode())
         menu.removeAttribute('hidden');
+      else
+        menu.setAttribute('hidden', 'true');
     }
   }
 
   // needs to run after every menu change; it can't run onpopupshowing, since it
   // is not synchronous (and Mozilla does not rerender changes to visible menus)
   function refreshMenu(e) {
+    updateMenuVisibility();
     getExtensions(populateMenu);
   }
 
   // render about:config/extensions.getsmartlinks.addons into our Tools menu
   function populateMenu(extensions) {
     var popup = $(POPUP_ID) || { appendChild: function() {} },
-       addons = getAddons(),
+       addons = addonToAppid(), menu_item,
          live = {}; // addon_id => menuitem element for addons that are enabled
 
     while (popup.firstChild)
@@ -93,7 +107,7 @@ window.getsmartlinks = (function(second_invocation) {
 
     popup.appendChild(MENUITEM({ label:    'Enable Smartlinks'
                                , type:     'checkbox'
-                               , checked:  (!!getPref('enabled')).toString() },
+                               , checked:  (!!getPref(ENABLED)).toString() },
                                { command:  toggle }));
     popup.appendChild(MENUSEPARATOR()); ///////////////////////////////////////
 
@@ -101,12 +115,12 @@ window.getsmartlinks = (function(second_invocation) {
                                , 'class':  'menuitem-non-iconic'
                                , disabled: 'true' }));
     for (var addon_id in addons) {
-      var addon     = extensions.get(addon_id),
-          menu_item = MENUITEM({ label:    addon.name
-                               , type:     'radio'
-                               , name:     'preferred'
-                               , addon_id: addon_id },
-                               { command:  change });
+      var addon = extensions.get(addon_id); if (!addon) continue;
+      menu_item = MENUITEM({ label:    addon.name
+                           , type:     'radio'
+                           , name:     'preferred'
+                           , addon_id: addon_id },
+                           { command:  change });
       if (addon.enabled)
         live[addon_id] = menu_item;
       else
@@ -133,8 +147,8 @@ window.getsmartlinks = (function(second_invocation) {
 
   // switch ourselves on | off => about:config/extensions.getsmartlinks.enabled
   function toggle(e) {
-    var enabled = !getPref('enabled', null);
-    setPref('enabled', enabled);
+    var enabled = !getPref(ENABLED, null);
+    setPref(ENABLED, enabled);
     track(enabled ? 'enable' : 'disable', {
       browser: 'ff',
       guid:    GUID
@@ -143,13 +157,17 @@ window.getsmartlinks = (function(second_invocation) {
 
   // add-on => head of about:config/extensions.getsmartlinks.preferred
   function change(e) {
-    var changed = userAddonId(e.target.getAttribute('addon_id'));
-    if (changed)
+    var now = e.target.getAttribute('addon_id'),
+        old = userPreferred()[0];
+    if (old !== now) {
+      promoteToFront('preferred', now);
+      var app_ids = addonToAppid();
       track('switch-preferred', {
         guid: GUID,
-        from: changed.from,
-        to:   changed.to
+        from: app_ids[old],
+        to:   app_ids[now]
       });
+    }
   }
 
   // pop a dialog to getsmartlinks.com's description of itself
@@ -161,8 +179,9 @@ window.getsmartlinks = (function(second_invocation) {
 
   function chromeLoad(e) {
     var appContent = $('appcontent');
-    if (appContent)
+    if (appContent) {
       appContent.addEventListener('DOMContentLoaded', contentLoad, true);
+    }
   }
 
   function contentLoad(e) {
@@ -171,29 +190,62 @@ window.getsmartlinks = (function(second_invocation) {
     ensureMenu();
 
     var contentWin = e.target.defaultView;
-    if (contentWin !== contentWin.top) return; // ignore iframes and the like
+    if (!contentWin) return;
 
-    var enabled = getPref('enabled', null);
+    var prompts = getPref(PROMPTS),
+        in_menu = getPref(SHOW_MENU),
+        enabled = getPref(ENABLED, null);
     if (enabled !== false) {
       if (OPT_IN) {
-        if (enabled === null) {
+        if (enabled === null && prompts) {
           pendingOptIn();
           return;
         }
       }
-      else if (enabled !== true)
-        setPref('enabled', true);
+      else if (enabled !== true && prompts && in_menu)
+        enabled = setPref(ENABLED, true);
 
-      var contentLoc = contentWin.location;
-      if (contentLoc.protocol === 'http:' &&
-          contentLoc.href.indexOf('http://api.getsmartlinks.com/r?') !== 0)
-        contentLoc.href = 'javascript:void '+ loadLinks.toString() +
-          '('+ string(userAppId()) +', '+ string(GUID) +');';
+      var contentLoc = contentWin.location, url, conf = {}, r2,
+          contentDoc = contentWin.document;
+      if (contentLoc.protocol === 'http:' && enabled && in_menu && prompts) {
+        if (contentLoc.href.indexOf('http://api.getsmartlinks.com/r?') !== 0) {
+          if (!avoid(contentLoc, contentWin, contentDoc)) {
+            var ref = getPref('http.sendRefererHeader', 2, 'network.');
+            if (ref !== 2) r2 = setPref('conf.no_url', ref) !== 2;
+            else delPref('conf.no_url');
+            lsPrefs('conf.').forEach(function(key) {
+              conf[key.slice(5)] = getPref(key);
+            });
+            conf = encodeJSON(conf);
+            contentLoc.href = 'javascript:void '+ loadLinks.toString() +
+              '('+ encodeJSON([userAppId(), GUID, conf, r2]).slice(1, -1) +');';
+          }
+        }
+        else if ((!contentDoc.body || contentDoc.body.id !== 'redirecting') &&
+                 (url = (contentLoc.search||'').match(/(?:^|&)url=([^&]+)/))) {
+          try { url = decodeURIComponent(url[1]); }
+          catch(e) {
+            try { url = unescape(url[1]); } catch(e) { url = '/'; }
+          }
+          url = 'javascript:void location.replace('+ encodeJSON(url) +')';
+          contentLoc.href = url;
+        }
+      }
     }
   }
 
-  function string(s) {
-    return '"'+ s.replace(/[\x22\\]/g, '\\$&') +'"';
+  function avoid(loc, win, doc) {
+    var host   = loc.hostname,
+        path_q = loc.pathname + (loc.search || ''),
+        b_list = getPref('avoid', {"http":{}})[loc.protocol.replace(/:/, '')],
+        b_rule = b_list && b_list[host],
+        body   = doc.body;
+    return (win.frameElement                       // we're in a sub-frame
+    || (body && /^frameset$/i.test(body.nodeName)) // ...or in a frameset
+    || /xml$/i.test(doc.contentType || "")         // non-HTML doc (XHTML DOM)
+    || !b_list                                     // not an ok url scheme
+    || /^[^.]+$|(\d[.:]*|\.local(domain)?)$/i.test(host) // non-FQDN or ip addr
+    || (b_rule && (1 === b_rule || path_q.match(b_rule, 'i')))); // spec. rules
   }
 
   // before opt-in; either a first install, or a week since last opt-in query
@@ -203,36 +255,66 @@ window.getsmartlinks = (function(second_invocation) {
         return; // only unmodified left mouse button clicks, please
       var choice = e.target.id;
       switch (choice) {
-        case 'accept':  setPref('enabled', true);  break;
-        case 'decline': setPref('enabled', false); break;
+        case ACCEPT:  setPref(ENABLED, true);  break;
+        case DECLINE: setPref(ENABLED, false); break;
         default: return;
       }
 
-      track('opt-in-'+ choice, bits);
+      on(choice);
       dialog.removeEventListener('unload', dismissed, true);
       dialog.close();
     }
 
     function dismissed() {
-      track('opt-in-dismiss', bits);
+      on(DISMISS);
+    }
+
+    // track action, and do any user prefs changes that goes with that action
+    function on(action) {
+      track('opt-in-'+ action, bits);
+      var prefs = conf[action] || {}, key, val;
+      for (key in prefs)
+        if (null !== (val = prefs[key]))
+          setPref(key, val);
+        else
+          delPref(key);
+      updateMenuVisibility(); // react immediately if we changed menu visibility
     }
 
     var date = today(),
         seen = getPref('seen-opt-in', null),
-        bits = { guid: GUID };
+        // how many days to wait until we show an opt-in dialog to the the user
+        next = getPref('next-opt-in', 0), // #125
+        conf = {}, // { accept, decline, dismiss: [config key, value to set] }
+        bits = { guid: GUID, src: 'ff', v_xpi: 10 };
+    if (seen) bits.not_first = date - seen; // days since last dialog try
 
-    if (!seen || seen < (date - 7)) {
-      setPref('seen-opt-in', date);
-      var dialog = openDialog(appPage('opt-in', { guid: GUID, src: 'ff' }),
-                              'getsmartlinks-opt-in',
-                              'centerscreen, dialog, resizable=no');
+    if (next > -1 && !seen || date >= (seen + next)) {
+      setPref('seen-opt-in', date); // set timestamp whether it's served or down
+      setPref('next-opt-in', next = next || 7); // avoid multiple tabs competing
+      var dialog = openDialog(appPage('opt-in', bits) +'#'+ (+new Date),
+                              'getsmartlinks-opt-in', getPref('opt-in-dialog',
+                              'centerscreen, dialog, width=400, height=365'));
+
       dialog.addEventListener('DOMContentLoaded', function() {
-        var ver = dialog.document.body.id;
-        if (ver) bits.dialog_ver = ver; // cohort tracking of message version
-        if (seen) bits.not_first = date - seen; // days since last dialog try
-        track('opt-in-view', bits);
-        dialog.addEventListener('unload', dismissed, true);
-        dialog.document.addEventListener('click', userChoice, true);
+        var doc  = dialog.document,
+            body = doc && doc.body,
+            ver  = body && body.id;
+        delete bits.src; // only /opt-in wants ?src=ff
+        if (!doc || !doc.getElementById(DECLINE) || !doc.getElementById(ACCEPT))
+          track('opt-in-down', bits, function() { dialog.close(); });
+        else {
+          if (ver) bits.dialog_ver = ver; // cohort tracking of message version
+
+          ['view', ACCEPT, DECLINE, DISMISS].forEach(function(pick) { try {
+            var prefs = body.getAttribute('data-conf-on-'+ pick);
+            if (prefs) conf[pick] = decodeJSON(prefs);
+          } catch(e) {} }); // still do the others if one value is ill-formatted
+
+          on('view');
+          dialog.addEventListener('unload', dismissed, true);
+          dialog.document.addEventListener('click', userChoice, true);
+        }
       }, true);
     }
   }
@@ -240,22 +322,24 @@ window.getsmartlinks = (function(second_invocation) {
   // safe code injection:
 
   // a copy of this function runs in content space (without elevated privileges)
-  function loadLinks(app_id, guid) {
+  function loadLinks(app_id, guid, conf, addref) {
     if ('smartlinks' in frames) // our iframe exists = the web page loads us too
       go(); // and to distribute revenue fairly, attempt to tie-break with it
-    else
-      load('loader.min.js', go);
+    else // as of v_xpi = 5, v_code > 4 needs v_loader > 4 (it passes T_RUN on),
+      load('loader.min.js?v_xpi=10', go); // hence this cache-breaker
 
     function go() {
-      load('run/'+ app_id +'?v_xpi=4&guid='+ guid);
+      load('run/'+ app_id +'?v_xpi=10&guid='+ guid +
+           (addref ? '&url='+ location.href.replace(/#.*/, '') : ''), 0, conf);
     }
 
-    function load(url, callback) {
+    function load(url, callback, conf) {
       var doc = document,
           par = doc.getElementsByTagName('head')[0] || doc.body,
+          arg = +new Date + (conf ? ':'+ conf : ''), // load start, JSON conf
           tag = elem('script', { type: 'text/javascript'
                                , async: 'async'
-                               , src: 'http://api.getsmartlinks.com/' + url
+                               , src: 'http://api.getsmartlinks.com/'+ url +'#'+ arg
                                });
       if (callback) tag.addEventListener('load', callback, false);
       par.appendChild(tag);
@@ -272,10 +356,22 @@ window.getsmartlinks = (function(second_invocation) {
 
   // utils:
 
-  function $(id) { return document.getElementById(id); }
+  function $(id) { try { return document.getElementById(id); } finally {} }
+  function isEmpty(obj) { for (obj in obj) return false; return true; }
 
-  function getPref(name, val) {
-    val = Application.prefs.getValue('extensions.getsmartlinks.' + name, val);
+  function lsPrefs(root) {
+    return Cc["@mozilla.org/preferences-service;1"]
+             .getService(Ci.nsIPrefService)
+             .getBranch(SMARTLINKS).getChildList(root || '', {});
+  }
+  function delPref(name) {
+    var branch = Application.prefs.get(SMARTLINKS + name);
+    if (branch) branch.reset();
+    return !!branch;
+  }
+  function getPref(name, value, branch) {
+    var val = Application.prefs.getValue((branch || SMARTLINKS) + name, value);
+    if (val === value) return value; // dan't JSON decode the default fill-in
     return 'string' !== typeof val || 'guid' === name ? val : decodeJSON(val);
   }
   function setPref(name, val) {
@@ -286,7 +382,8 @@ window.getsmartlinks = (function(second_invocation) {
          (val % 1 || val < -0x80000000 || val > 0x7FFFFFFF)))
       encoded = encodeJSON(val);
     if (DEV_MODE) Application.console.log('setPref' + encodeJSON([name, val]));
-    Application.prefs.setValue('extensions.getsmartlinks.' + name, encoded);
+    Application.prefs.setValue(SMARTLINKS + name, encoded);
+    if ([SHOW_MENU, PROMPTS].indexOf(name) !== -1) refreshMenu();
     return val;
   }
 
@@ -308,7 +405,7 @@ window.getsmartlinks = (function(second_invocation) {
     if (exts)
       cb(exts);
     else
-     Application.getExtensions(cb);
+      Application.getExtensions(cb);
   }
 
   // integer days since epoch
@@ -316,13 +413,15 @@ window.getsmartlinks = (function(second_invocation) {
     return Math.round(Date.now() / 864e5);
   }
 
-  function track(what, extra) {
+  function track(what, extra, done) {
     var xhr = new XMLHttpRequest;
     extra = extra || {};
     extra.app_id = APP_ID;
+    extra.v_xpi = 10;
+    if (done) xhr.onload = xhr.onerror = done;
     var url = 'http://api.getsmartlinks.com/track/'+ what +'?'+ param(extra);
     xhr.open('GET', url);
-    xhr.send();
+    xhr.send('');
   }
 
   function param(args) {
@@ -338,92 +437,67 @@ window.getsmartlinks = (function(second_invocation) {
               (path || '') + (data ? '?' + param(data) : '');
   }
 
+  function userAppId() {
+    return addonToAppid()[userPreferred()[0]];
+  }
+
+  function addonToAppid() {
+    return getPref('addons') || // failsafe, if user tampers
+      updateKeypair('addons', ADDON_ID, APP_ID) && getPref('addons');
+  }
+
   // array with most recently selected add-on on top
   function userPreferred() {
-    var preferred = getPref('preferred', []);
-    if (preferred.length) {
-      if (-1 === preferred.indexOf(ADDON_ID)) {
-        preferred.push(ADDON_ID);
-        setPref('preferred', preferred);
-      }
-      return preferred;
-    }
-    setPref('preferred', [ADDON_ID]);
-    return [ADDON_ID];
-  }
-
-  // gets or sets the addon_id of which add-on is currently sponsored
-  function userAddonId(id) {
-    function dedupe(x) { return x !== id; }
-    var rest = userPreferred(),
-        curr = rest[0];
-    if (!id) return curr;
-    setPref('preferred', [id].concat(rest.filter(dedupe)));
-    return curr !== id && { from: curr, to: id };
-  }
-
-  function userAppId() {
-    return getAddons()[userAddonId()];
+    return appendIfMissing('preferred', ADDON_ID);
   }
 
   function registerApp() {
-    var addons = getAddons();
-    addons[ADDON_ID] = APP_ID;
-    if (ranToday()) // => true if last-ran changed
-      setPref('addons', addons);
-  }
+    // registration -- updates `preferred`, `last-ran` and `addons`:
+    var preferred = userPreferred(), // addon_id, ...
+        not_today = updateKeypair('last-ran', ADDON_ID, today()), // changed-p?
+        new_addon = updateKeypair('addons', ADDON_ID, APP_ID), // addon_id : app
+        enabled   = getPref(ENABLED); // false === dismissed or disabled (now)
 
-  // attest that this addon embedded us today (so purgeOld() won't purge it)
-  function ranToday() {
-    var ran  = ranToday.c = ranToday.c || getPref('last-ran', {}),
-        date = today();
-    if (ran[ADDON_ID] !== date) {
-      ran[ADDON_ID] = date;
-      setPref('last-ran', ran);
-      return true;
+    // If both seen_ext and ext_2_app got changed, it probably is a new install.
+    // If current preferred add-on is either disabled or dismissed, show opt-in:
+    if (new_addon && not_today && !enabled) {
+      promoteToFront('preferred', ADDON_ID); // should ask opt-in for this addon
+      delPref('seen-opt-in');
+      delPref(ENABLED);
     }
-    return false;
   }
 
-  // cut revenue from add-ons that at some point used to, but now don't embed us
-  function purgeOld(addons) {
-    function purge(extensions) {
-      var last = getPref('last-ran',  {}),
-          pref = getPref('preferred', []),
-          date = today(),
-          same = true;
-      for (var id in addons) {
-        var ran   = last[id] || date,
-            delta = date - ran,
-            addon = extensions.get(id);
-        if (ADDON_ID !== id &&            // can't expire this add-on
-            !addon ||                     // purge uninstalled add-ons
-            addon.enabled && delta > 1) { // purge add-ons no longer calling
-          delete last[id];
-          delete addons[id];
-          if (-1 !== (id = pref.indexOf(ADDON_ID)))
-            pref.splice(id, 1);
-          same = false;
-        }
-      }
-      if (!same) {
-        setPref('addons', addons);
-        setPref('last-ran', last);
-        setPref('preferred', pref);
-      }
+  // #129: promote a new extention as `preferred`, when appropriate
+  function pickActive(extensions) {
+    function isAncient(id) { return -1 !== dated_old.indexOf(id); }
+    function isInactive(id) { // uninstalled, disabled, unsmartlinked?
+      var addon = extensions.get(id);
+      return !addon || !addon.enabled || seen_ext[id] < too_old;
     }
 
-    getExtensions(purge); // async API, so removal is deferred until a bit later
-    return addons;
-  }
+    var date       = today(),
+        too_old    = date - 2,
+        seen_ext   = getPref('last-ran'), // { addon_id : date }
+        inactive   = getPref('inactive', {}), // { date : [addon_id, ...], ... }
+        preferred  = userPreferred(),
+        dated_now  = preferred.filter(isInactive), // [addon_id, ...]
+        dated_old  = [];
+    inactive[date] = dated_now.slice(0);
 
-  function getAddons() {
-    var addons = getPref('addons', null);
-    if (addons)
-      return purgeOld(addons);
-    addons = {};
-    addons[ADDON_ID] = APP_ID;
-    return addons;
+    for (date in inactive) {
+      if (date > too_old) continue;
+      dated_old = dated_old.concat(inactive[date]);
+      delete inactive[date];
+    }
+    inactive[too_old] = dated_now = dated_now.filter(isAncient);
+    saveUnlessEmpty('inactive', inactive);
+
+    // if the first ids are inactive, promote first active
+    for (var n = 0, active = preferred[n];
+         dated_now.indexOf(active) !== -1;
+         active = preferred[++n])
+      ;
+    if (n) promoteToFront('preferred', active);
   }
 
   function makeGuid() {
@@ -435,24 +509,68 @@ window.getsmartlinks = (function(second_invocation) {
     return [hex(8), hex(4), hex(4), hex(4), hex(12)].join('-').toUpperCase();
   }
 
+  // a few high-level prefs functions:
+
+  // set key `key` of object `id` to `val` and return true if changed
+  function updateKeypair(id, key, val) {
+    if (DEV_MODE) Application.console.log('update:', arguments);
+    var obj = getPref(id, {}),
+        old = obj[key];
+    if (old === val) return false;
+    obj[key] = val;
+    setPref(id, obj);
+    return true;
+  }
+
+  // append `value` to `id` if not already present; returns whole array
+  function appendIfMissing(id, value) {
+    var array = getPref(id, []);
+    if (array.indexOf(value) === -1)
+      return setPref(id, array.concat(value));
+    return array;
+  }
+
+  // move `value` to the front of the `id` array whether it existed in it or not
+  // and return the saved array
   function promoteToFront(id, value) {
     var array = getPref(id), at = array.indexOf(value);
     switch (at) {
-      case 0:	return;
+      case 0:	return array;
       case -1:	array.unshift(value); break;
       default:	array.unshift(array.splice(at, 1)[0]); break;
     }
-    setPref(id, array);
+    return setPref(id, array);
+  }
+
+  // purge all empty arrays and objects from val and stores the result as `id`
+  // (or deletes it, if the result was empty too)
+  function saveUnlessEmpty(id, val) {
+    for (var key in val)
+      if (isEmpty(val[key]))
+        delete val[key];
+    if (!isEmpty(val))
+      return setPref(id, val);
+    delPref(id);
+    return null;
   }
 
   function getJSONCodec() {
-    return Cc['@mozilla.org/dom/json;1'].createInstance(Ci.nsIJSON);
+    if (getJSONCodec.codec) return getJSONCodec.codec;
+    if (typeof JSON !== 'undefined' && (typeof JSON.stringify === 'function' &&
+        typeof JSON.parse === 'function' && JSON.parse('"\\""') === '"' &&
+        JSON.stringify('"') === '"\\""')) return getJSONCodec.codec = JSON;
+
+    var borkedJSON = Cc['@mozilla.org/dom/json;1'].createInstance(Ci.nsIJSON);
+    return getJSONCodec.codec = // nsIJSON only groks arrays or objects; wrap:
+      { parse:     function(x) { return borkedJSON.decode('['+ x +']')[0]; }
+      , stringify: function(x) { return borkedJSON.encode([ x ]).slice(1, -1); }
+      };
   }
   function decodeJSON(json) {
-    return getJSONCodec().decode(json);
+    return getJSONCodec().parse(json);
   }
   function encodeJSON(obj) {
-    return getJSONCodec().encode(obj);
+    return getJSONCodec().stringify(obj);
   }
 
   function openNewTab(url) {
@@ -462,9 +580,10 @@ window.getsmartlinks = (function(second_invocation) {
   }
 
   // ++simpler https://developer.mozilla.org/en/Supporting_private_browsing_mode
+  // (calls onChange(isNormalMode) every time we toggle between PBM and non-PBM)
   function inPrivateBrowsingMode(onChange) {
     function togglePBM(aSubject, aTopic, aData) {
-      if ('private-browsing' === aTopic) onChange('enter' === aData);
+      if ('private-browsing' === aTopic) onChange('enter' !== aData);
     }
 
     if (onChange)
