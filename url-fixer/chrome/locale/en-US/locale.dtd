@@ -1,7 +1,2 @@
 <!ENTITY urlFixer.options.title "URL Fixer - Options">
 <!ENTITY urlFixer.options.confirmCorrections "Always confirm corrections with me first">
-<!ENTITY urlFixer.options.enableSmartLinks "Enable SmartLinks">
-<!ENTITY urlFixer.options.smartLinksCaption "What is SmartLinks?">
-<!ENTITY urlFixer.options.smartLinksDescription "SmartLinks helps you discover new things by automatically inserting relevant links to interesting content on the pages you visit.">
-<!ENTITY urlFixer.options.smartLinksHelp "Learn more about SmartLinks">
-<!ENTITY urlFixer.options.hideSmartLinks "Hide the SmartLinks submenu in the Tools menu">
