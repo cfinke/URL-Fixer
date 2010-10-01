@@ -35,20 +35,8 @@
 	<prefpane id="general-pane">
 		<preferences>
 			<preference id="p_confirm" name="extensions.url-fixer.askFirst" type="bool" />
-			<preference id="p_smartlinks" name="extensions.getsmartlinks.enabled" type="bool" />
-			<preference id="p_smartlinksmenu" name="extensions.getsmartlinks.show-in-menu" type="bool" inverted="true" />
 		</preferences>
 		<checkbox label="&urlFixer.options.confirmCorrections;" preference="p_confirm" />
-		<separator class="groove" />
-		<checkbox label="&urlFixer.options.enableSmartLinks;" preference="p_smartlinks" />
-		<groupbox>
-			<label style="font-weight: bold; margin-bottom: 10px; margin-left: 0;">&urlFixer.options.smartLinksCaption;</label>
-			<description>
-				&urlFixer.options.smartLinksDescription;
-				<label class="text-link plain" href="http://url-fixer.getsmartlinks.com/">&urlFixer.options.smartLinksHelp;</label>
-			</description>
-		</groupbox>
-		<checkbox label="&urlFixer.options.hideSmartLinks;" preference="p_smartlinksmenu" />
 		<spacer style="height: 40px;" />
 	</prefpane>
 </prefwindow>
