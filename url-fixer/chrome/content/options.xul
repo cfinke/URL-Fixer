@@ -37,6 +37,5 @@
 			<preference id="p_confirm" name="extensions.url-fixer.askFirst" type="bool" />
 		</preferences>
 		<checkbox label="&urlFixer.options.confirmCorrections;" preference="p_confirm" />
-		<spacer style="height: 40px;" />
 	</prefpane>
 </prefwindow>
