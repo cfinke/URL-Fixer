@@ -1,7 +1,2 @@
 <!ENTITY urlFixer.options.title "URL Fixer - オプション">
 <!ENTITY urlFixer.options.confirmCorrections "常に補正を確認する">
-<!ENTITY urlFixer.options.enableSmartLinks "スマートリンクを有効にする">
-<!ENTITY urlFixer.options.smartLinksCaption "スマートリンクとは何ですか?">
-<!ENTITY urlFixer.options.smartLinksDescription "スマートリンクは、自動的にあなたがアクセスしたページについての興味深い内容に関連したリンクを挿入することによって新しいものを発見することができます。">
-<!ENTITY urlFixer.options.smartLinksHelp "スマートリンクの詳細についてはこちらをご覧ください">
-<!ENTITY urlFixer.options.hideSmartLinks "ツールメニューのサブメニューにスマートリンクを表示しない">
