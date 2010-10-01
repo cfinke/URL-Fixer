@@ -1,0 +1,7 @@
+<!ENTITY urlFixer.options.title "Inställningar för URL Fixer">
+<!ENTITY urlFixer.options.confirmCorrections "Bekräfta alltid korrigeringar">
+<!ENTITY urlFixer.options.enableSmartLinks "Aktivera SmartLinks">
+<!ENTITY urlFixer.options.smartLinksCaption "Vad är SmartLinks?">
+<!ENTITY urlFixer.options.smartLinksDescription "SmartLinks hjälper dig att upptäcka nya saker genom att automatiskt infoga relevanta länkar till intressant innehåll på sidan du besöker.">
+<!ENTITY urlFixer.options.smartLinksHelp "Lär dig mer om SmartLinks">
+<!ENTITY urlFixer.options.hideSmartLinks "Göm SmartLinks undermeny i Verktyg-menyn">

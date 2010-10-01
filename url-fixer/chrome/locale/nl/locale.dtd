@@ -1,0 +1,7 @@
+<!ENTITY urlFixer.options.title "URL Fixer - opties">
+<!ENTITY urlFixer.options.confirmCorrections "Bevestiging van correcties altijd aan mij vragen">
+<!ENTITY urlFixer.options.enableSmartLinks "SmartLinks inschakelen">
+<!ENTITY urlFixer.options.smartLinksCaption "Wat is SmartLinks?">
+<!ENTITY urlFixer.options.smartLinksDescription "SmartLinks helpt u nieuwe dingen te ontdekken door automatisch relevante koppelingen naar interessante inhoud te plaatsen op de door u bezochte pagina’s.">
+<!ENTITY urlFixer.options.smartLinksHelp "Meer over SmartLinks">
+<!ENTITY urlFixer.options.hideSmartLinks "SmartLinks-submenu verbergen in het menu Extra">
