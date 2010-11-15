@@ -1,0 +1,1 @@
+URL Fixer is a Firefox extension that automatically corrects typographical errors in URLs typed in the Firefox Location Bar.
