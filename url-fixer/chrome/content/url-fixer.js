@@ -52,6 +52,8 @@ var URLFIXER = {
 	},
 	
 	load : function () {
+		removeEventListener("load", URLFIXER.load, false);
+		
 		function doit() {
 			// Add our typo-fixing function to the URL bar
 			URLFIXER.addTypoFixer();
@@ -60,6 +62,8 @@ var URLFIXER = {
 			URLFIXER.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.url-fixer.");
 			URLFIXER.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
 			URLFIXER.prefs.addObserver("", URLFIXER, false);
+			
+			addEventListener("unload", URLFIXER.unload, false);
 			
 			setTimeout(URLFIXER.showFirstRun, 3000);
 		}
@@ -87,6 +91,12 @@ var URLFIXER = {
 				}
 			});
 		}
+	},
+	
+	unload : function () {
+		removeEventListener("unload", URLFIXER.unload, false);
+		
+		URLFIXER.prefs.removeObserver("", URLFIXER);
 	},
 	
 	observe: function(subject, topic, data) {
