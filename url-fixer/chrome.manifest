@@ -7,6 +7,7 @@ skin    url-fixer   classic         chrome/skin/
 locale  url-fixer  ar-SA  chrome/locale/ar-SA/
 locale  url-fixer  ca-AD  chrome/locale/ca-AD/
 locale  url-fixer  cs-CZ  chrome/locale/cs-CZ/
+locale  url-fixer  da     chrome/locale/da/
 locale  url-fixer  da-DK  chrome/locale/da-DK/
 locale  url-fixer  de     chrome/locale/de/
 locale  url-fixer  en-US  chrome/locale/en-US/
@@ -22,6 +23,7 @@ locale  url-fixer  ko-KR  chrome/locale/ko-KR/
 locale  url-fixer  lt-LT  chrome/locale/lt-LT/
 locale  url-fixer  mk-MK  chrome/locale/mk-MK/
 locale  url-fixer  nl     chrome/locale/nl/
+locale  url-fixer  pl     chrome/locale/pl/
 locale  url-fixer  pl-PL  chrome/locale/pl-PL/
 locale  url-fixer  pt-BR  chrome/locale/pt-BR/
 locale  url-fixer  pt-PT  chrome/locale/pt-PT/
