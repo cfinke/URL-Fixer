@@ -1,21 +1,13 @@
 rm url-fixer.xpi
 rm -rf .tmp_xpi_dir/
-
-chmod -R 0777 url-fixer/
-
 mkdir .tmp_xpi_dir/
 cp -r url-fixer/* .tmp_xpi_dir/
 
 rm -rf `find ./.tmp_xpi_dir/ -name ".DS_Store"`
 rm -rf `find ./.tmp_xpi_dir/ -name "Thumbs.db"`
-rm -rf `find ./.tmp_xpi_dir/ -name ".svn"`
+rm -rf `find ./.tmp_xpi_dir/ -name ".git"`
 
-cd .tmp_xpi_dir/chrome/
-zip -rq ../url-fixer.jar *
-rm -rf *
-mv ../url-fixer.jar ./
-
-cd ../
+cd .tmp_xpi_dir/
 zip -rq ../url-fixer.xpi *
 cd ../
 

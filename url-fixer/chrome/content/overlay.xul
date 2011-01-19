@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE overlay [
+	<!ENTITY % localLocale SYSTEM "chrome://url-fixer/locale/locale.dtd">
+	%localLocale;
+	<!ENTITY % backupLocale SYSTEM "chrome://url-fixer-default-locale/content/locale.dtd">
+	%backupLocale;
+]>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script type="application/x-javascript" src="chrome://url-fixer/content/url-fixer.js"></script>
 	<script type="application/x-javascript">
 		<![CDATA[
-			
-			addEventListener("load", function (event) { URLFIXER.load(); }, false);
-			
+		
+		addEventListener("load", URLFIXER.load, false);
+		
 		]]>
 	</script>
 	<stringbundleset id="stringbundleset">
+		<stringbundle id="url-fixer-backup-bundle" src="chrome://url-fixer-default-locale/content/locale.properties" />
 		<stringbundle id="url-fixer-bundle" src="chrome://url-fixer/locale/locale.properties" />
 	</stringbundleset>
 </overlay>

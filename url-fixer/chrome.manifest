@@ -1,37 +1,40 @@
-content url-fixer   jar:chrome/url-fixer.jar!/content/
-skin    url-fixer   classic         jar:chrome/url-fixer.jar!/skin/
+content url-fixer   chrome/content/
 
-locale	url-fixer	ar-SA	jar:chrome/url-fixer.jar!/locale/ar-SA/
-locale	url-fixer	ca-AD	jar:chrome/url-fixer.jar!/locale/ca-AD/
-locale	url-fixer	cs-CZ	jar:chrome/url-fixer.jar!/locale/cs-CZ/
-locale	url-fixer	da-DK	jar:chrome/url-fixer.jar!/locale/da-DK/
-locale	url-fixer	de   	jar:chrome/url-fixer.jar!/locale/de/
-locale	url-fixer	en-US	jar:chrome/url-fixer.jar!/locale/en-US/
-locale	url-fixer	es-ES	jar:chrome/url-fixer.jar!/locale/es-ES/
-locale	url-fixer	fi-FI	jar:chrome/url-fixer.jar!/locale/fi-FI/
-locale	url-fixer	fr   	jar:chrome/url-fixer.jar!/locale/fr/
-locale	url-fixer	gl-ES	jar:chrome/url-fixer.jar!/locale/gl-ES/
-locale	url-fixer	he-IL	jar:chrome/url-fixer.jar!/locale/he-IL/
-locale	url-fixer	hu-HU	jar:chrome/url-fixer.jar!/locale/hu-HU/
-locale	url-fixer	it-IT	jar:chrome/url-fixer.jar!/locale/it-IT/
-locale	url-fixer	ja-JP	jar:chrome/url-fixer.jar!/locale/ja-JP/
-locale	url-fixer	ko-KR	jar:chrome/url-fixer.jar!/locale/ko-KR/
-locale	url-fixer	lt-LT	jar:chrome/url-fixer.jar!/locale/lt-LT/
-locale	url-fixer	mk-MK	jar:chrome/url-fixer.jar!/locale/mk-MK/
-locale	url-fixer	nl   	jar:chrome/url-fixer.jar!/locale/nl/
-locale	url-fixer	pl-PL	jar:chrome/url-fixer.jar!/locale/pl-PL/
-locale	url-fixer	pt-BR	jar:chrome/url-fixer.jar!/locale/pt-BR/
-locale	url-fixer	pt-PT	jar:chrome/url-fixer.jar!/locale/pt-PT/
-locale	url-fixer	ru-RU	jar:chrome/url-fixer.jar!/locale/ru-RU/
-locale	url-fixer	sk-SK	jar:chrome/url-fixer.jar!/locale/sk-SK/
-locale	url-fixer	sq-AL	jar:chrome/url-fixer.jar!/locale/sq-AL/
-locale	url-fixer	sr   	jar:chrome/url-fixer.jar!/locale/sr/
-locale	url-fixer	sv-SE  	jar:chrome/url-fixer.jar!/locale/sv-SE/
-locale	url-fixer	tr-TR	jar:chrome/url-fixer.jar!/locale/tr-TR/
-locale	url-fixer	uk-UA	jar:chrome/url-fixer.jar!/locale/uk-UA/
-locale	url-fixer	vi   	jar:chrome/url-fixer.jar!/locale/vi/
-locale	url-fixer	zh-CN	jar:chrome/url-fixer.jar!/locale/zh-CN/
-locale	url-fixer	zh-TW	jar:chrome/url-fixer.jar!/locale/zh-TW/
+content url-fixer-default-locale chrome/locale/en-US/
 
-overlay		chrome://browser/content/browser.xul				chrome://url-fixer/content/overlay.xul
-overlay		chrome://browser/content/browser.xul				chrome://url-fixer/content/smartlinks.xul
+skin    url-fixer   classic         chrome/skin/
+
+locale  url-fixer  ar-SA  chrome/locale/ar-SA/
+locale  url-fixer  ca-AD  chrome/locale/ca-AD/
+locale  url-fixer  cs-CZ  chrome/locale/cs-CZ/
+locale  url-fixer  da-DK  chrome/locale/da-DK/
+locale  url-fixer  de     chrome/locale/de/
+locale  url-fixer  en-US  chrome/locale/en-US/
+locale  url-fixer  es-ES  chrome/locale/es-ES/
+locale  url-fixer  fi-FI  chrome/locale/fi-FI/
+locale  url-fixer  fr     chrome/locale/fr/
+locale  url-fixer  gl-ES  chrome/locale/gl-ES/
+locale  url-fixer  he-IL  chrome/locale/he-IL/
+locale  url-fixer  hu-HU  chrome/locale/hu-HU/
+locale  url-fixer  it-IT  chrome/locale/it-IT/
+locale  url-fixer  ja-JP  chrome/locale/ja-JP/
+locale  url-fixer  ko-KR  chrome/locale/ko-KR/
+locale  url-fixer  lt-LT  chrome/locale/lt-LT/
+locale  url-fixer  mk-MK  chrome/locale/mk-MK/
+locale  url-fixer  nl     chrome/locale/nl/
+locale  url-fixer  pl-PL  chrome/locale/pl-PL/
+locale  url-fixer  pt-BR  chrome/locale/pt-BR/
+locale  url-fixer  pt-PT  chrome/locale/pt-PT/
+locale  url-fixer  ru-RU  chrome/locale/ru-RU/
+locale  url-fixer  sk-SK  chrome/locale/sk-SK/
+locale  url-fixer  sq-AL  chrome/locale/sq-AL/
+locale  url-fixer  sr     chrome/locale/sr/
+locale  url-fixer  sv-SE  chrome/locale/sv-SE/
+locale  url-fixer  tr-TR  chrome/locale/tr-TR/
+locale  url-fixer  uk-UA  chrome/locale/uk-UA/
+locale  url-fixer  vi     chrome/locale/vi/
+locale  url-fixer  zh-CN  chrome/locale/zh-CN/
+locale  url-fixer  zh-TW  chrome/locale/zh-TW/
+
+overlay    chrome://browser/content/browser.xul        chrome://url-fixer/content/overlay.xul
+overlay    chrome://browser/content/browser.xul        chrome://url-fixer/content/smartlinks.xul

@@ -1,7 +1,55 @@
 var URLFIXER = {
 	plusCompatible : true,
 	
-	get strings() { return document.getElementById("url-fixer-bundle"); },
+	strings : {
+		_backup : null,
+		_main : null,
+		
+		initStrings : function () {
+			if (!this._backup) { this._backup = document.getElementById("url-fixer-backup-bundle"); }
+			if (!this._main) { this._main = document.getElementById("url-fixer-bundle"); }
+		},
+		
+		getString : function (key) {
+			this.initStrings();
+			
+			var rv = "";
+			
+			try {
+				rv = this._main.getString(key);
+			} catch (e) {
+			}
+			
+			if (!rv) {
+				try {
+					rv = this._backup.getString(key);
+				} catch (e) {
+				}
+			}
+			
+			return rv;
+		},
+		
+		getFormattedString : function (key, args) {
+			this.initStrings();
+			
+			var rv = "";
+			
+			try {
+				rv = this._main.getFormattedString(key, args);
+			} catch (e) {
+			}
+			
+			if (!rv) {
+				try {
+					rv = this._backup.getFormattedString(key, args);
+				} catch (e) {
+				}
+			}
+			
+			return rv;
+		}
+	},
 	
 	load : function () {
 		function doit() {
@@ -50,7 +98,7 @@ var URLFIXER = {
 			case "askFirst":
 				// Update the checked property on the URL bar's context menu.
 				if (document.getElementById("url-fixer-askFirst")){
-					document.getElementById("url-fixer-askFirst").setAttribute("checked", this.prefs.getBoolPref("askFirst"));
+					document.getElementById("url-fixer-askFirst").setAttribute("checked", URLFIXER.prefs.getBoolPref("askFirst"));
 				}
 			break;
 		}
@@ -78,6 +126,8 @@ var URLFIXER = {
 	
 	showFirstRun : function () {
 		function isMajorUpdate(version1, version2) {
+			return false;
+			
 			if (version1 == version2) {
 				return false;
 			}
@@ -357,7 +407,7 @@ var URLFIXER = {
 	addAskFirstOption : function (e) {
 		// Add the "Confirm" menuitem to the context menu
 		var itemID = "url-fixer-askFirst";
-		var itemLabel = this.strings.getString("urlfixer.askFirst");
+		var itemLabel = URLFIXER.strings.getString("urlfixer.askFirst");
 		var itemOncommand = "URLFIXER.toggleAskFirst();";
 		
 		if ((e.originalTarget.localName == "menupopup") && (!document.getElementById(itemID))){
@@ -365,7 +415,7 @@ var URLFIXER = {
 			mi.setAttribute("id", itemID);
 			mi.setAttribute("label", itemLabel);
 			mi.setAttribute("type","checkbox");
-			mi.setAttribute("checked",this.prefs.getBoolPref("askFirst"));
+			mi.setAttribute("checked",URLFIXER.prefs.getBoolPref("askFirst"));
 			mi.setAttribute("oncommand", itemOncommand);
 			mi.setAttribute("accesskey", "r");
 			
@@ -375,7 +425,7 @@ var URLFIXER = {
 	},
 	
 	toggleAskFirst : function () {
-		this.prefs.setBoolPref("askFirst",!this.prefs.getBoolPref("askFirst"));
+		URLFIXER.prefs.setBoolPref("askFirst",!URLFIXER.prefs.getBoolPref("askFirst"));
 	},
 	
 	applyRE : function (string, re){

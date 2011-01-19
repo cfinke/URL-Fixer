@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<!DOCTYPE overlay SYSTEM "chrome://url-fixer/locale/locale.dtd">
+<!DOCTYPE prefwindow [
+	<!ENTITY % localLocale SYSTEM "chrome://url-fixer/locale/locale.dtd">
+	%localLocale;
+	<!ENTITY % backupLocale SYSTEM "chrome://url-fixer-default-locale/content/locale.dtd">
+	%backupLocale;
+]>
 <prefwindow
 	title="&urlFixer.options.title;"
 	ondialogaccept="return URLFIXER_PREFS.accept();"
