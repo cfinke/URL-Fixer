@@ -102,6 +102,11 @@ var URLFIXER = {
 		removeEventListener("unload", URLFIXER.unload, false);
 		
 		URLFIXER.prefs.removeObserver("", URLFIXER);
+		
+		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].getService(Components.interfaces.nsIIdleService)
+		try { idleService.removeIdleObserver(URLFIXER, 60); } catch (notObserving) { }
+		
+		clearTimeout(URLFIXER.domainCollectionTimer);
 	},
 	
 	observe: function(subject, topic, data) {
