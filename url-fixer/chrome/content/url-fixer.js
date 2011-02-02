@@ -1,6 +1,9 @@
 var URLFIXER = {
 	plusCompatible : true,
 	
+	domains : [],
+	domainCollectionTimer : null,
+	
 	strings : {
 		_backup : null,
 		_main : null,
@@ -65,6 +68,8 @@ var URLFIXER = {
 			
 			addEventListener("unload", URLFIXER.unload, false);
 			
+			URLFIXER.observe("ignoreThisArgument", "nsPref:changed", "domainOptIn");
+			
 			setTimeout(URLFIXER.showFirstRun, 3000);
 		}
 		
@@ -100,17 +105,39 @@ var URLFIXER = {
 	},
 	
 	observe: function(subject, topic, data) {
-		if (topic != "nsPref:changed") {
-			return;
+		if (topic === "nsPref:changed") {
+			switch(data) {
+				case "askFirst":
+					// Update the checked property on the URL bar's context menu.
+					if (document.getElementById("url-fixer-askFirst")){
+						document.getElementById("url-fixer-askFirst").setAttribute("checked", URLFIXER.prefs.getBoolPref("askFirst"));
+					}
+				break;
+				case "domainOptIn":
+					clearTimeout(URLFIXER.domainCollectionTimer);
+				
+					var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].getService(Components.interfaces.nsIIdleService)
+				
+					if (!URLFIXER.prefs.getBoolPref("domainOptIn")) {
+						try {
+							idleService.removeIdleObserver(URLFIXER, 60);
+						} catch (notObserving) { }
+						
+						URLFIXER.domains = [];
+					}
+					else {
+						// Save domain data every 15 minutes, or whenever the user is idle for 60 seconds.
+						URLFIXER.domainCollectionTimer = setInterval(URLFIXER.anonymousDataCollection, 1000 * 60 * 15);
+						
+						idleService.addIdleObserver(URLFIXER, 60);
+						
+						URLFIXER.prefs.setBoolPref("domainOptInAsk", true);
+					}
+				break;
+			}
 		}
-		
-		switch(data) {
-			case "askFirst":
-				// Update the checked property on the URL bar's context menu.
-				if (document.getElementById("url-fixer-askFirst")){
-					document.getElementById("url-fixer-askFirst").setAttribute("checked", URLFIXER.prefs.getBoolPref("askFirst"));
-				}
-			break;
+		else if (topic === "idle") {
+			URLFIXER.anonymousDataCollection();
 		}
 	},
 	
@@ -164,6 +191,24 @@ var URLFIXER = {
 		}
 		
 		function doShowFirstRun(version) {
+			// We only want to make a request of upgrading users or users who have restarted Firefox at least 3 times.
+			if (isUpdate()) {
+				URLFIXER.prefs.setIntPref("counter", 3);
+			}
+			else {
+				var counter = URLFIXER.prefs.getIntPref("counter");
+				
+				if (counter < 3) {
+					counter++;
+				
+					URLFIXER.prefs.setIntPref("counter", counter);
+				}
+			}
+			
+			if (typeof Browser === 'undefined' && !URLFIXER.prefs.getBoolPref("domainOptInAsk") && !URLFIXER.prefs.getBoolPref("domainOptIn") && URLFIXER.prefs.getIntPref("counter") >= 3) {
+				URLFIXER.requestOptIn();
+			}
+			
 			if (isMajorUpdate(URLFIXER.prefs.getCharPref("version"), version)) {
 				if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
 					// Browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version, true);
@@ -324,7 +369,19 @@ var URLFIXER = {
 					
 						// Save the domain part we found so we can tell if it changed
 						var oldValue = urlValue;
-					
+						
+						if (URLFIXER.prefs.getBoolPref("domainOptIn")) {
+							var typedDomain = oldValue;
+							
+							if (typedDomain.indexOf("//") != -1) {
+								typedDomain = typedDomain.split("//")[1];
+							}
+							
+							if (typedDomain.indexOf("about:") === -1) {
+								URLFIXER.domains.push(typedDomain.toLowerCase());
+							}
+						}
+						
 						// Lower case it to avoid making all REs case-insensitive
 						urlValue = urlValue.toLowerCase();
 					
@@ -332,7 +389,7 @@ var URLFIXER = {
 						for (var i = 0; i < res.length; i++){
 							urlValue = URLFIXER.applyRE(urlValue, res[i]);
 						}
-					
+						
 						if (urlValue != oldValue.toLowerCase()){
 							urlValue = this.value.replace(oldValue, urlValue);
 						
@@ -369,7 +426,7 @@ var URLFIXER = {
 								this.value = urlValue;
 							}
 						}
-					
+						
 						if (justCorrect) {
 							return true;
 						}
@@ -451,5 +508,77 @@ var URLFIXER = {
 		}
 		
 		return string;
+	},
+	
+	requestOptIn : function () {
+		var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
+
+		var check = { value: true };
+		var flags = 
+			prompts.BUTTON_TITLE_IS_STRING * prompts.BUTTON_POS_0 +
+			prompts.BUTTON_TITLE_IS_STRING * prompts.BUTTON_POS_1 +
+			prompts.BUTTON_TITLE_IS_STRING * prompts.BUTTON_POS_2 +
+			prompts.BUTTON_POS_1_DEFAULT;
+		
+		var button = prompts.confirmEx(window, URLFIXER.strings.getString("urlfixer.optInTitle"), URLFIXER.strings.getString("urlfixer.optInDescription"), flags, URLFIXER.strings.getString("urlfixer.optInAccept"), URLFIXER.strings.getString("urlfixer.optInDecline"), URLFIXER.strings.getString("urlfixer.optInLater"), null, check);
+		
+		if (button == 2) {
+			// User chose "More Information"
+			
+			if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
+				Browser.addTab("http://data-urlfixer.efinke.com/", true);
+			}
+			else {
+				var browser = getBrowser();
+				browser.selectedTab = browser.addTab("http://data-urlfixer.efinke.com/");
+			}
+			
+			return false;
+		}
+		else {
+			URLFIXER.prefs.setBoolPref("domainOptInAsk", true);
+		
+			if (button == 0){
+				// 0 == Yes
+				URLFIXER.prefs.setBoolPref("domainOptIn", true);
+				
+				return true;
+			}
+			else {
+				// button == 1
+				// 1 == No
+				URLFIXER.prefs.setBoolPref("domainOptIn", false);
+				
+				return false;
+			}
+		}
+	},
+	
+	anonymousDataCollection : function () {
+		if (URLFIXER.domains.length > 0 && URLFIXER.prefs.getBoolPref("domainOptIn")) {
+			var argString = "";
+			
+			URLFIXER.domains.forEach(function (el) {
+				argString += "domains[]=" + encodeURIComponent(el) + "&";
+			});
+			
+			URLFIXER.domains = [];
+			
+			var req = new XMLHttpRequest();
+			req.open("POST", "http://data-urlfixer.efinke.com/", true);
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			req.setRequestHeader("Content-Length", argString.length);
+			
+			/*
+			req.onreadystatechange = function () {
+				if (req.readyState == 4) {
+					alert(req.status);
+					alert(req.responseText);
+				}
+			};
+			*/
+			
+			req.send(argString);
+		}
 	}
 };

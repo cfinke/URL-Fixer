@@ -9,7 +9,6 @@
 <prefwindow
 	title="&urlFixer.options.title;"
 	ondialogaccept="return URLFIXER_PREFS.accept();"
-	style="max-width: 35em;"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script type="application/x-javascript">
 		<![CDATA[
@@ -40,7 +39,12 @@
 	<prefpane id="general-pane">
 		<preferences>
 			<preference id="p_confirm" name="extensions.url-fixer.askFirst" type="bool" />
+			<preference id="p_optin" name="extensions.url-fixer.domainOptIn" type="bool" />
 		</preferences>
 		<checkbox label="&urlFixer.options.confirmCorrections;" preference="p_confirm" />
+		<groupbox>
+			<checkbox label="&urlFixer.options.optIn;" preference="p_optin" />
+			<label class="text-link" href="http://data-urlfixer.efinke.com/">&urlFixer.options.optIn.learnMore;</label>
+		</groupbox>
 	</prefpane>
 </prefwindow>
