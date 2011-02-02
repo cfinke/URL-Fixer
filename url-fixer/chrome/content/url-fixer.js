@@ -119,7 +119,9 @@ var URLFIXER = {
 					}
 				break;
 				case "domainOptIn":
-					clearTimeout(URLFIXER.domainCollectionTimer);
+					try {
+						URLFIXER.domainCollectionTimer.cancel();
+					} catch (notActive) { }
 				
 					var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].getService(Components.interfaces.nsIIdleService)
 				
@@ -132,7 +134,8 @@ var URLFIXER = {
 					}
 					else {
 						// Save domain data every 15 minutes, or whenever the user is idle for 60 seconds.
-						URLFIXER.domainCollectionTimer = setInterval(URLFIXER.anonymousDataCollection, 1000 * 60 * 15);
+						URLFIXER.domainCollectionTimer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+						URLFIXER.domainCollectionTimer.initWithCallback(URLFIXER, 1000 * 60 * 15, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
 						
 						idleService.addIdleObserver(URLFIXER, 60);
 						
@@ -144,6 +147,14 @@ var URLFIXER = {
 		else if (topic === "idle") {
 			URLFIXER.anonymousDataCollection();
 		}
+	},
+	
+	/**
+	 * nsITimer callback.
+	 */
+	
+	notify : function (timer) {
+		URLFIXER.anonymousDataCollection();
 	},
 	
 	getVersion : function (callback) {
