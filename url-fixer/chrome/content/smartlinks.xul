@@ -2,7 +2,7 @@
 <!DOCTYPE overlay>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 <script type="application/x-javascript"><![CDATA[
-window.getsmartlinks = (function(old_gsl) {
+window.GetSmartLinks = (function(STATE, OLD) {
   const    C = Components, Cc = C.classes, Ci = C.interfaces, // FF3.0 compat
       OPT_IN = true,
       APP_ID = 'url_fixer',
@@ -19,51 +19,99 @@ window.getsmartlinks = (function(old_gsl) {
                , ScriptableUnicodeConverter: 'intl/scriptableunicodeconverter'
                , SessionStore: 'browser/sessionstore;1'
                , VersionComparator: 'xpcom/version-comparator;1'
-               , XULAppInfo: 'xre/app-info;1' }, MAX_URL = 2079,
+               , XULAppInfo: 'xre/app-info;1' }, MAX_URL = 2079, NEW = 'is-new',
        AVOID = 'avoid', DATED = 'inactive', EI2AI = 'addons', LAST = 'last-ran',
       ACCEPT = 'accept', DECLINE = 'decline', DISMISS = 'dismiss', O = 'opt-in',
-  OPT_DIALOG = O +'-dialog', SEEN_OPT = 'seen-'+ O, NEXT_OPT = 'next-'+ O,
   REM_DIALOG = 'remove-dialog', DCL = 'DOMContentLoaded', CLOSE = 'close',
   SMARTLINKS = 'extensions.getsmartlinks.', ENABLED = 'enabled', UID = 'guid',
    SHOW_MENU = 'show-in-menu', PROMPTS = O +'-prompts', PREFER = 'preferred',
-           M = 'getsmartlinks_com_', MENU_ID = M +'menu', POPUP_ID = M +'popup',
- FELL_ASLEEP = 'sleep_notification', WOKE_UP = 'wake_notification', EUA = 'eua',
-     SUPPORT = 'supporting', SUPPORT_TYPE = SUPPORT + '.type', V = 27,
+           M = 'getsmartlinks_com_', MENU_ID = M +'Menu', POPUP_ID = M +'Popup',
+  PBM_CHANGE = 'private-browsing', REDIRECT_URL = 'http://api.getsmartlinks.com/r?',
+     SUPPORT = 'supporting', SUPPORT_TYPE = SUPPORT + '.type', V = 28,
         FUNC = /^((?:MD|SHA)\d+|SLICE\((-?\d+)(?:,(-?\d+))?\))$/,
-     VIRTUAL = ['JSON', 'APP_ID', 'URL', 'REFERRER', 'APPS', 'VERSION', 'DATE',
-                'HOUR', 'TIME', 'API_HOST', 'FLUSH', 'ADDON_ID', 'OPT_IN'],
-REDIRECT_URL = 'http://api.getsmartlinks.com/r?',
-     prompts = getPref(PROMPTS, 'from_v4'), old_gte_v9 = prompts !== 'from_v4';
-  var GUID, EUA_KEYS, EUA_IDLE, SLEEPER, USAGE, FOCUS, TAB_NO, ON_LOAD = [];
-try {
+     VIRTUAL = ['JSON', 'APP_ID', 'URL', 'REFERRER', 'APPS', 'VERSION', 'MASTER'
+               ,'DATE','HOUR','TIME','API_HOST','FLUSH','ADDON_ID','OPT_IN'],
+ IS_OPTED_IN = 'opted-in', MAIN = 'smartlinks@getsmartlinks.com', EUA = 'eua';
+  var GUID, EUA_KEYS, USAGE = false, FOCUS = false, TAB_NO, ON_LOAD = [], ME,
+      EVENTS = {}, OBSERVERS = {};
+
   if (badMoz() || getPref('off'))
-    return old_gsl;
+    return STATE;
 
-  switch (prompts) {
-    case false: return old_gsl;
-    case 'from_v4':
-      setPref(PROMPTS, OPT_IN);
-      if (getPref(UID))
-        setPref(SHOW_MENU, !!getPref(ENABLED));
-      else
-        setPref(SHOW_MENU, true);
+  return registerApp();
+
+  function askForMaster(extensions, options) {
+    var knows_best = options.ME, pickMaster, ret_value = null;
+    if (ADDON_ID !== MAIN)
+      knows_best = getHighestVersion([function noCriteria() { return true; }]);
+    if ((pickMaster = (knows_best || {}).pickMaster))
+      ret_value = pickMaster(extensions, options);
+    return ret_value;
   }
-  registerApp();
-} catch(e) { error('early init', e, 1); }
-  if (old_gsl) return old_gsl;
-try {
-  getGUID();
-  getExtensions(pickActive);
 
-  inPrivateBrowsingMode(updateMenuVisibility);
-  onEvent(window, 'load', chromeLoad, false, 'chromeWin.load');
-  onEvent(window, 'unload', chromeUnload, false, 'chromeWin.unload');
+  function pickMaster(extensions, options) {
+    function isOn(a) { a = extensions.get(a.ADDON_ID); return a && a.enabled; }
+    function isStandAloneAndOn(a) { return MAIN == a.ADDON_ID && isOn(a); }
 
-  try {
-    onEvent(gBrowser, 'load', ensureMenu, false, 'gBrowser');
-  } catch(e) {}
-} catch(e) { error('late init', e, 1); }
-  return ADDON_ID;
+    var master = getHighestVersion([isStandAloneAndOn, isOn]);
+    if (master && master !== STATE.master) {
+      if (STATE.master) STATE.master.abdicate(extensions, false);
+      STATE.master = master;
+      if (master.init)
+        return master.init(extensions, options);
+    }
+    return null;
+  }
+
+  function init(extensions, options) {
+    pickPreferred(extensions);
+
+    EVENTS.load = onEvent(window, 'load', chromeLoad, false, 'ChromeWin.load');
+
+    if ('complete' === document.readyState) EVENTS.load[2]();
+  }
+
+  function abdicate(extensions, permanently) {
+    function allOptIn(a, b) { return a.OPT_IN ? b : a; }
+    var no = STATE.order.indexOf(ME), menu = STATE.menu, tools;
+    if (ME != STATE.master || no < 0) return;
+    delete STATE.master;
+    if (permanently) {
+      STATE.order.splice(no, 1);
+      if (!OPT_IN)
+        STATE.opt_in = !!STATE.order.reduce(allOptIn, { OPT_IN: true }).OPT_IN;
+    }
+
+    chromeUnload();
+
+    if ((tools = menu && menu.parentNode)) tools.removeChild(menu);
+    delete STATE.menu;
+  }
+
+  function getHighestVersion(filters) {
+    function promote(ext) {
+      var now = list.indexOf(ext);
+      if (ext && now > 0) list = list.splice(now, 1).concat(list);
+    }
+    filters = filters || [];
+    var all = STATE && STATE.order, filter, list;
+
+    while ((filter = filters.shift()))
+      if ((list = all.filter(filter)).length)
+        break;
+    if (!list.length) return null;
+
+    promote(ME);
+    promote(STATE.master);
+
+    for (var best = list[0], max_v = best.V, i = 1, ext; ext = list[i]; i++)
+      if (ext.V > max_v) {
+        best = ext;
+        max_v = best.V;
+      }
+
+    return best;
+  }
 
 
   function inst(id) { return cc(id).createInstance(Ci['nsI'+ id]); }
@@ -71,25 +119,25 @@ try {
   function cc(id) { return Cc['@mozilla.org/'+ CONTRACT_IDS[id]]; }
 
   function ensureMenu() {
-    var menu = $(MENU_ID), tools = $('menu_ToolsPopup');
+    var menu = STATE.menu || $(MENU_ID), tools = $('menu_ToolsPopup');
     if (menu || !tools)
       return;
 
-    tools.appendChild(menu =
-      MENU({ label:   getPref(SHOW_MENU +'.label', "SmartLinks")
-           , id:      MENU_ID
-           , 'class': 'menu-iconic' }));
-    menu.appendChild(
-      MENUPOPUP({ id: POPUP_ID },
-                { popuphiding: refreshMenu }));
+    tools.appendChild(menu = STATE.menu =
+      tag('menu', { label:   getPref(SHOW_MENU +'.label', 'SmartLinks')
+                  , id:      MENU_ID
+                  , 'class': 'menu-iconic' }));
+    menu.appendChild(tag('menupopup', { id: POPUP_ID }
+                                    , { popuphiding: refreshMenu }));
     refreshMenu();
-    onEvent(tools, 'popupshowing', refreshMenu, false, 'Tools menu');
+    EVENTS.m = onEvent(tools, 'popupshowing', refreshMenu, false, 'Tools menu');
   }
 
   function updateMenuVisibility() {
-    var menu = $(MENU_ID), popup = $(POPUP_ID);
+    var menu = STATE.menu || $(MENU_ID), popup = $(POPUP_ID);
     if (menu) {
-      if (!getPref('off') && (!OPT_IN || getPref(PROMPTS)) && getPref(SHOW_MENU)
+      if (!getPref('off') && getPref(SHOW_MENU)
+      &&  (!STATE.opt_in || getPref(IS_OPTED_IN))
       &&  !inPrivateBrowsingMode() && popup && popup.hasChildNodes())
         menu.removeAttribute('hidden');
       else
@@ -237,49 +285,50 @@ try {
         was = box.getAttribute('type'),
         val = box.getAttribute('checked') === 'true',
         eid = box.getAttribute('addon_id'),
-        aid = addonToAppid()[eid],
-        old = userPreferred()[0];
+        aid = addonToAppid()[eid];
     if (was === "checkbox") {
       setPref(ENABLED +'.'+ aid, val);
       track((val ? 'add' : 'sub') +'-preferred', { which: aid, cause: 'menu' });
     }
     else
       promoteToFront(PREFER, eid, 'menu'); // none|radio mode: explicit promote
-    if (was !== "radio") getExtensions(pickActive, 'menu'); // caused a toggle?
+    if (was !== "radio") getExtensions(pickPreferred, 'menu');
   }
 
 
-  function driveDialog(topic, specs, where) {
-    specs = $getPref(topic, specs || null);
-    var key   = specs.key && getPref(specs.key, specs.fallback || false),
+  function driveDialog(topic, specs, where, win) {
+    specs = $getPref(topic, specs || null, win);
+    var key   = specs.key && getPref(specs.key, specs.fallback || false, win),
         spec  = specs.key ? specs[key] : specs,
         mesg  = spec.message, checkbox = spec.checkbox,
-        title = spec.title, buts = spec.buttons, win = !spec.detached,
-        pick  = mesg && buts && basicDialog(mesg, title, buts, checkbox, win),
+        title = spec.title, buts = spec.buttons, affix = !spec.detached,
+        pick  = mesg && buts && basicDialog(mesg, title, buts, checkbox, affix),
         check = checkbox && (checkbox.value ? 'on' : 'off'),
         error = !mesg || !buts;
     where = (where || '') +'Dialog '+ topic + (check ? ' w/ checkbox' : '');
     if (error) werror(where + ' has no '+ (mesg ? 'message' : 'buttons') +'!');
-    else if (check) action(checkbox, check, where +', check');
-    action(buts[pick], check, where +'["'+ buts[pick].title +'"]');
+    else if (check) action(checkbox, check, where +', check', win);
+    action(buts[pick], check, where +'["'+ buts[pick].title +'"]', win);
   }
 
 
 
-  function action(spec, branch, where) { try {
+  function action(spec, branch, where, win) { try {
     if (spec) spec = $refPrefs(spec); else return;
     spec = branch && spec[branch] || spec; // cbox? do button[on | off], if set
     if ('object' !== typeof spec) return;
-    if (spec.prefs) editPrefs($refPrefs(spec.prefs));
+    win = win || window.content;
+    if (spec.prefs) editPrefs($refPrefs(spec.prefs, win));
     if (spec.flush) flushPrefs();
-    if (spec.track) track(spec.track, spec.bits);
-    if (ON_LOAD && (spec.url || spec.dialog)) {
+    if (spec.track) track(spec.track, spec.bits, null, win);
+    if (ON_LOAD && (spec.url || spec.opt_in || spec.dialog)) {
       delete spec.prefs; delete spec.flush; delete spec.track;
       ON_LOAD.push(partial(action, spec, branch, where));
       return;
     }
     if (spec.url) {
-      var args = typeof spec.url === 'string' ? [spec.url, {}, true] : spec.url,
+      var args = typeof spec.url !== 'string' ? spec.url
+               : [spec.url, { v_xpi: null }, win],
           url  = args[0], getURL = /^\w+:/.test(url) ? urlArgs : appPage;
       openNewTab(getURL.apply(this, args)).focus();
     }
@@ -287,16 +336,17 @@ try {
       var pick = spec.pick, then = 'object' === typeof pick ? pick : spec[pick];
       where += (where ? ', p' : 'P') + 'ick:'+ encodeJSON(pick);
       if ('object' === typeof then) {
-        action(then, 0, where);
+        action(then, 0, where, win);
         return;
       }
     }
+    if (spec.opt_in) showOptIn(spec.opt_in, win);
     if (spec.dialog) {
       var got_id = 'string' === typeof spec.dialog ? spec.dialog : '',
           dialog = got_id ? getPref(got_id) : spec.dialog;
       try {
       if (dialog)
-        driveDialog(got_id, dialog, where ? where +', ' : '');
+        driveDialog(got_id, dialog, where ? where +', ' : '', win);
       else
         werror((where || '') +' => no dialog "'+ got_id +'"');
       } catch(e) { error('action()', e); }
@@ -328,49 +378,64 @@ try {
     return bord[pick];
   }
 
-  function update(path, win, to_version) {
+  function update(path, win, to_version, args) {
     function recode(key) { config[key] = encodeJSON(getPref(key, nil, win)); }
-    function updateConfig(e) { try {
-        var spec = decodeJSON(e.target.responseText), fn = editPrefs;
-        if (path === 'new') fn = action;
-        fn(spec, null, 'Prefs update via '+ path);
-      } catch(e) {}
+    function serverSays(e) { try {
+        var raw = e.target.responseText, spec = decodeJSON(raw), fn = editPrefs;
+        if (path !== 'update') {
+          fn = action;
+          if (spec.upgraded) delete STATE.from_old;
+        }
+        fn(spec, null, 'serverSays via /'+ path, win);
+      } catch(x) { error('error handling /'+ path +' JSON:\n\n'+ raw, x); }
     }
 
-    if ('number' === typeof to_version && to_version < current_ver) return;
-    var config = {}, current_ver = getPref('conf.update', 0), nil = undefined,
-        args = { from: current_ver, guid: getGUID(), v_xpi: V, app_id: APP_ID,
-                 opt_in: OPT_IN, addon_id: ADDON_ID };
+    var config = {}, at_ver = getPref('conf.update', 0), nil = undefined;
+    if ('number' === typeof to_version && to_version < at_ver)
+      return;
+    args = extend({ from: at_ver, guid: getGUID(), v_xpi: V, app_id: userAppId()
+                  , master: APP_ID, addon_id: ADDON_ID, all_opt_in: STATE.opt_in
+                  }, args || {});
 
     lsPrefs().concat(VIRTUAL).map(recode);
-    post('https://api.getsmartlinks.com/'+ path, args, config, updateConfig);
+    post('https://api.getsmartlinks.com/'+ path, args, config, serverSays);
   }
 
   // page-load listener:
 
   function chromeLoad(e) {
+    if (!EVENTS.unload) EVENTS.unload =
+      onEvent(window, 'unload', chromeUnload, false, 'ChromeWin.unload');
+
     ensureMenu();
-    var appContent = $('appcontent'), obs;
+    var appContent = $('appcontent');
     if (appContent) {
-      onEvent(appContent, DCL, contentLoad, true, 'appContent');
-      svc('IdleService').addIdleObserver(EUA_IDLE =
+      EVENTS.app = onEvent(appContent, DCL, contentLoad, true, 'appContent');
+
+      var is = svc('IdleService'), idle_observer =
         { observe: function(subj, topic, ms) {
             if ('back' === topic || 'idle' === topic) {
               msgTab('usage', USAGE = 'idle' !== topic);
-            }
-          }
-        }, 1);
-      (obs = svc('ObserverService')).addObserver(SLEEPER =
+            } } }, sleep_observer =
         { observe: function(subj, topic, ms) {
-            if (WOKE_UP === topic) focused(); else unfocused();
-          }
-        }, FELL_ASLEEP, false);
-      obs.addObserver(SLEEPER, WOKE_UP, false);
-      onEvent(document, 'focus',  focused, true);
-      onEvent(document, 'blur', unfocused, true);
+            if ('wake_notification' === topic) focused(); else unfocused();
+          } };
+      is.addIdleObserver(idle_observer, 1);
+      OBSERVERS.idle = function() { is.removeIdleObserver(idle_observer, 1); };
+      observe({ 'sleep_notification': sleep_observer
+              , 'wake_notification': sleep_observer
+              , 'private-browsing': { observe: function togglePBM(s, t, data) {
+                                        updateMenuVisibility('enter' !== data);
+                                      } }
+              });
+
+      EVENTS.f = onEvent(document, 'focus',  focused, true);
+      EVENTS.b = onEvent(document, 'blur', unfocused, true);
       TAB_NO = inTabNo();
-      onEvent(gBrowser.tabContainer, 'TabSelect', tabChange, false);
+      EVENTS.t = onEvent(gBrowser.tabContainer, 'TabSelect', tabChange, false);
     }
+
+    if (!e && EVENTS.app) EVENTS.app[2]({ target:content && content.document });
   }
 
   function   focused() { if (FOCUS != true) { msgTab('focus', FOCUS = true); } }
@@ -384,53 +449,60 @@ try {
     }
   }
 
+  function observe(spec) {
+    var obs = svc('ObserverService'), id;
+    for (id in spec) obs.addObserver(OBSERVERS[id] = spec[id], id, false);
+  }
+
   function chromeUnload() { try {
-    var obs = svc('ObserverService');
-    obs.removeObserver(SLEEPER, WOKE_UP);
-    obs.removeObserver(SLEEPER, FELL_ASLEEP);
-    svc('IdleService').removeIdleObserver(EUA_IDLE, 1);
-  } catch(e) {} }
+    var obs = svc('ObserverService'), id, o;
+    for (id in OBSERVERS) {
+      if ('function' === typeof (o = OBSERVERS[id]))
+        o();
+      else
+        obs.removeObserver(o, id);
+      delete OBSERVERS[id];
+    }
+    for (id in EVENTS) {
+      rmEvent(EVENTS[id]);
+      delete EVENTS[id];
+    }
+  } catch(e) { error('chromeUnload', e); } }
 
   function contentLoad(e) { try {
-    if (inPrivateBrowsingMode()) return;
-
-    var enqueued = ON_LOAD;
+    var enqueued = ON_LOAD
+      , contentWin = e.target.defaultView;
     if (enqueued) {
       ON_LOAD = null;
-      while (enqueued.length) enqueued.shift()();
+      while (enqueued.length) enqueued.shift()(contentWin);
     }
 
-    var contentWin = e.target.defaultView,
-        seen       = contentWin === (window.content && window.content.window);
-    if (!contentWin) return;
+    var new_addons = getPref(NEW)
+      , frontmostp = contentWin === (window.content && window.content.window);
+    if (new_addons && frontmostp)
+      getExtensions(partial(newAddons, new_addons), contentWin, 'newAddons');
 
-    var not_off = !getPref('off') && !OPT_IN || getPref(PROMPTS),
-        in_menu = getPref(SHOW_MENU),
-        enabled = getPref(ENABLED, null);
-    if (enabled !== false) {
-      if (OPT_IN && enabled === null && not_off) {
-        pendingOptIn();
-        return;
-      }
+    if (!contentWin || getPref('off') ||
+        (STATE.opt_in && !getPref(IS_OPTED_IN)) ||
+        !getPref(ENABLED) || !getPref(SHOW_MENU) || inPrivateBrowsingMode())
+      return;
 
-      var contentLoc = contentWin.location, url, nil = undefined,
-          contentDoc = contentWin.document;
-      if (enabled && in_menu && not_off) {
-        if (contentLoc.href.indexOf(REDIRECT_URL) !== 0) {
-          if (!(avoid(contentWin, contentDoc, contentLoc))) {
-            fetchRun(contentWin, contentDoc, contentLoc, seen);
-          }
-        }
-        else if ((!contentDoc.body || contentDoc.body.id !== 'redirecting') &&
-                 (url = (contentLoc.search||'').match(/(?:^|&)url=([^&]+)/))) {
-          try { url = decodeURIComponent(url[1]); }
-          catch(e) {
-            try { url = unescape(url[1]); } catch(e) { url = '/'; }
-          }
-          url = 'javascript:void location.replace('+ encodeJSON(url) +')';
-          contentLoc.href = url;
-        }
+    var contentLoc = contentWin.location, url
+      , contentDoc = contentWin.document;
+
+    if (contentLoc.href.indexOf(REDIRECT_URL) !== 0) {
+      if (!(avoid(contentWin, contentDoc, contentLoc))) {
+        fetchRun(contentWin, contentDoc, contentLoc, frontmostp);
       }
+    }
+    else if ((!contentDoc.body || contentDoc.body.id !== 'redirecting') &&
+             (url = (contentLoc.search||'').match(/(?:^|&)url=([^&]+)/))) {
+      try { url = decodeURIComponent(url[1]); }
+      catch(e) {
+        try { url = unescape(url[1]); } catch(e) { url = '/'; }
+      }
+      url = 'javascript:void location.replace('+ encodeJSON(url) +')';
+      contentLoc.href = url;
     }
   } catch(e) { error(DCL, e); } }
 
@@ -443,7 +515,7 @@ try {
     }).join(',');
   }
 
-  function makeRunQuery(base, url, win, doc) {
+  function makeRunQuery(base, url, win, doc, app_id) {
     function deQueueEUA(hash, data) {
       var q = queue[hash], n = q ? q.indexOf(data) : -1;
       if (n < 0) return;
@@ -451,9 +523,10 @@ try {
       if (!q.length) delete queue[hash];
     }
 
-    var query = { v_xpi: V, guid: GUID, url: url, apps: getPref('APPS') }, c, n,
-        queue = getTmp(EUA, {}), tab_data = EUA_KEYS && getTabState(doc, M+EUA),
-        ref_k = hashEUA(win), run_url, blen, hash, list, eua, dirty, data = {};
+    var query = { v_xpi: V, guid: GUID, url: url, apps: getPref('APPS') }, c, n
+      , queue = getTmp(EUA, {}), tab_data = EUA_KEYS && getTabState(doc, M+EUA)
+      , ref_k = hashEUA(win), run_url, blen, hash, list, eua, dirty, data = {};
+    if (app_id !== APP_ID) query.master = APP_ID;
 
     if (tab_data && tab_data.slice(0, ref_k.length) === ref_k) {
       hash = tab_data.slice(0, c = tab_data.indexOf(':'));
@@ -463,7 +536,7 @@ try {
       setTabState(doc, M+EUA, '');
     }
 
-    blen = (run_url = urlArgs(base, query, null, win)).length;
+    blen = (run_url = urlArgs(base, query, win)).length;
 
     for (hash in queue) {
       list = queue[hash];
@@ -486,11 +559,11 @@ try {
   }
 
   function fetchRun(contentWin, contentDoc, contentLoc, seen) {
-    var conf = {}, url = mkUrl(contentLoc.href), t,
+    var conf = {}, url = mkUrl(contentLoc.href), t, app_id = getPref('APP_ID'),
         load = urlArgs('loader.min.js'),
         meta = extend($getPref('loader', {}, contentWin), { seen: seen }),
-        rurl = 'http://api.getsmartlinks.com/run/'+ getPref('APP_ID'),
-        rarg = makeRunQuery(rurl, url, contentWin, contentDoc);
+        rurl = 'http://api.getsmartlinks.com/run/'+ app_id,
+        rarg = makeRunQuery(rurl, url, contentWin, contentDoc, app_id);
 
     lsPrefs('conf.').forEach(function(key) {
       conf[key.slice(5)] = getPref(key);
@@ -540,7 +613,9 @@ try {
   }
 
   function msgTab(name, data, win, browser) {
-    win = win || (browser = browser || gBrowser.selectedBrowser).contentWindow;
+    if (ON_LOAD || !win && !(browser = browser || gBrowser.selectedBrowser))
+      return;
+    win = win || browser.contentWindow;
     var doc = win.document, e, n = false, msg = { data:data, src:'XPI', v:V };
     if (avoid(win, doc))
       return;
@@ -572,7 +647,12 @@ try {
     || (b_rule && (1 == b_rule || (new RegExp(b_rule, 'i').test(path_q))));
   }
 
-  function pendingOptIn() {
+  function cantAskForOptIn() {
+    return (!STATE.opt_in || getPref(IS_OPTED_IN)) &&
+           getPref(SHOW_MENU) && getPref(ENABLED);
+  }
+
+  function showOptIn(addon, contentWin) {
     function userChoice(e) {
       if ((e.which > 1) || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey)
         return;
@@ -584,7 +664,7 @@ try {
       }
 
       on(choice);
-      dialog.removeEventListener('unload', onDismiss, true);
+      rmEvent(onDismiss);
       setTimeout(function() { dialog.close(); }, conf.done ? 1000 : 0);
     }
 
@@ -597,54 +677,61 @@ try {
     }
 
     function closed() {
-      track('opt-in-down', bits);
+      on('down');
     }
 
     function on(action) { try {
-      dialog.removeEventListener(CLOSE, noDCLp, false);
+      rmEvent(noDCLp);
       setPref('log.opt-in-'+ action, today());
-      editPrefs(conf[action] || {});
+      if (conf[action]) editPrefs(conf[action]);
       track('opt-in-'+ action, extend(bits, $refPrefs(conf.track || {})));
       updateMenuVisibility();
+      if (okay) delPref(NEW);
+      if ('accept' !== action)
+        setPref(IS_OPTED_IN, true);
       flushPrefs();
     } catch(e) { error('opt-in on('+ encodeJSON(action) +')', e); } }
 
-    var date = today(),
-        seen = getPref(SEEN_OPT, null),
-        next = getPref(NEXT_OPT, 0),
-        conf = {},
-        bits = logBits({ js: '+$javascript.|enabled:0' });
-    if (seen) bits.not_first = date - seen;
+    if (cantAskForOptIn()) return;
 
-    if (!seen || next > -1 && date >= (seen + next)) { // next = -1 == just once
-      setPref(SEEN_OPT, date);
-      setPref(NEXT_OPT, next = next || 7);
-      var dialog = openDialog(appPage('opt-in', bits) +'#'+ (+new Date),
-                              'getsmartlinks-opt-in', getPref(OPT_DIALOG,
-                              'centerscreen,dialog,width=400,height=365')),
-          noDCLp = onEvent(dialog, CLOSE, closed, false, O), onDismiss;
+    delPref(ENABLED);
+    setPref(SHOW_MENU, false);
+    promoteToFront(PREFER, addon.addon_id);
 
-      onEvent(dialog, DCL, function() {
-        var doc  = dialog.document,
-            body = doc && doc.body,
-            ver  = body && body.id;
-        if (!doc || !doc.getElementById(DECLINE) || !doc.getElementById(ACCEPT))
-          dialog.close();
-        else {
-          if (ver) bits.dialog_ver = ver;
+    var date = today()
+      , okay = false
+      , conf = {}
+      , bits = logBits(extend({ js: '+$javascript.|enabled:0' }, addon));
 
-          ['track', 'view','done',ACCEPT,DECLINE,DISMISS].map(function(p, n) {
-            var prefs = body.getAttribute('data-'+ (n ? 'conf-on-' : '') + p);
-            if (prefs) try { conf[p] = decodeJSON(prefs); } catch(e) {}
-          });
+    var opt_in = appPage('opt-in', bits, contentWin, addon.app_id)
+      , dialog = openDialog(opt_in +'#'+ (+new Date),
+                            'getsmartlinks-opt-in', getPref('opt-in-dialog',
+                            'centerscreen,dialog,width=400,height=365'))
+      , noDCLp = onEvent(dialog, CLOSE, closed, false, O), onDismiss
+      , atDCL = onEvent(dialog, DCL,
 
-          on('view');
-          onDismiss = onEvent(dialog, 'unload', dismissed, true, O);
-          onEvent(dialog, 'message', close, false, O);
-          onEvent(dialog.document, 'click', userChoice, true, O + ' document');
-        }
-      }, true, O);
-    }
+    function gotOptIn() {
+      var doc  = dialog.document,
+          body = doc && doc.body,
+          ver  = body && body.id;
+      rmEvent(atDCL);
+      if (!doc || !doc.getElementById(DECLINE) || !doc.getElementById(ACCEPT))
+        dialog.close();
+      else {
+        okay = true;
+        if (ver) bits.dialog_ver = ver;
+
+        ['track', 'view','done',ACCEPT,DECLINE,DISMISS].map(function(p, n) {
+          var prefs = body.getAttribute('data-'+ (n ? 'conf-on-' : '') + p);
+          if (prefs) try { conf[p] = decodeJSON(prefs); } catch(e) {}
+        });
+
+        on('view');
+        onDismiss = onEvent(dialog, 'unload', dismissed, true, O);
+        onEvent(dialog, 'message', close, false, O);
+        onEvent(dialog.document, 'click', userChoice, true, O + ' document');
+      }
+    }, true, O);
   }
 
   // safe code injection:
@@ -751,7 +838,7 @@ try {
     var u = inst('ScriptableUnicodeConverter'), enc = {}, raw, i,
         c = inst('CryptoHash');
     u.charset = 'UTF-8';
-    raw = u.convertToByteArray(string, enc);
+    raw = u.convertToByteArray(string || '', enc);
     c.init(c[hash]);
     c.update(raw, raw.length);
     raw = c.finish(false);
@@ -770,11 +857,13 @@ try {
     }
     if (!id--) return encodeJSON(value);
     if (!id--) return userAppId();
-    var t = new Date, c = win || content, h = c ? c.history : [], l = h.length;
-    if (!id--) return c ? mkUrl(c.location.href) : '';
-    if (!id--) return l > 1 ? mkUrl(h[l - 2]) : '';
-    if (id--) return [V, today(), t.getHours(), +t, 'api.getsmartlinks.com', true,
-                      ADDON_ID, OPT_IN][id];
+    var t = new Date, c = win || content, h, l; if (id < 2) try {
+      l = (h = c ? c.history : []).length;
+      if (!id--) return c ? mkUrl(c.location.href) : '';
+      if (!id--) return l > 1 ? mkUrl(h[l - 2]) : '';
+    } catch(e) { return null; }
+    if (id > 2) return [ V, APP_ID, today(), t.getHours(), +t, 'api.getsmartlinks.com'
+                       , true, ADDON_ID, STATE.opt_in][id - 3];
     var e2ai = addonToAppid(), last = getPref(LAST), now = today();
     return getPref(PREFER).map(app2last).join(',');
   }
@@ -808,7 +897,7 @@ try {
          (val % 1 || val < -0x80000000 || val > 0x7FFFFFFF)))
       encoded = encodeJSON(val);
     Application.prefs.setValue(SMARTLINKS + name, encoded);
-    if ([SHOW_MENU, PROMPTS, 'off'].indexOf(name) !== -1) refreshMenu();
+    if ([SHOW_MENU, 'off'].indexOf(name) !== -1) refreshMenu();
     return val;
   }
 
@@ -845,17 +934,15 @@ try {
   }
 
   function logBits(also, win) {
-    var bits = extend(getPref('log', {}, win), also || {});
+    var bits = getPref('log', {}, win);
     try { bits = $refPrefs(bits, win); } catch(e) {}
     bits.app_id = getPref('APP_ID');
     bits.v_xpi = V;
     bits.guid = getGUID();
-    return bits;
+    return extend(bits, also || {});
   }
 
-  function MENU     (attrs, events) { return tag('menu',      attrs, events); }
-  function MENUITEM (attrs, events) { return tag('menuitem',  attrs, events); }
-  function MENUPOPUP(attrs, events) { return tag('menupopup', attrs, events); }
+  function MENUITEM (attrs, events) { return tag('menuitem', attrs, events); }
   function tag(name, attrs, events) {
     var elem = document.createElement(name), all = attrs || {};
     for (var attr in all)
@@ -865,9 +952,17 @@ try {
     return elem;
   }
 
-  function getExtensions(cb, arg) {
-    var done = function(all) { return cb(all, arg); },
-        exts = Application.extensions;
+  function getExtensions(cb, arg, name) {
+    var done = protect(function gotExtensions(all) {
+                         function gc() { if (STATE.exts) delete STATE.exts; };
+                         if (!sync && all !== STATE.exts) {
+                           setTimeout(gc, 1000);
+                           STATE.exts = all;
+                         }
+                         return cb(all, arg);
+                       }, name||'getExts')
+      , sync = Application.extensions
+      , exts = sync || STATE.exts;
     if (exts)
       done(exts);
     else
@@ -880,8 +975,13 @@ try {
 
   function onEvent(obj, name, cb, capture, at) {
     cb = protect(cb, name + (at ? ' on ' + at : ''));
-    obj.addEventListener(name, cb, capture);
-    return cb;
+    if (obj) obj.addEventListener(name, cb, capture);
+    return [obj, name, cb, capture];
+  }
+
+  function rmEvent(args) {
+    var on = args[0];
+    if (on) on.removeEventListener.apply(on, args.slice(1));
   }
 
   function protect(fn, tag) { return function() {
@@ -908,9 +1008,9 @@ try {
     msgTab('track', { name: what, details: extra }, win);
   }
 
-  function urlArgs(url, args, win, no_ver) {
+  function urlArgs(url, args, win) {
     args = extend(args || {}, match(url, getPref('extra', {}, win)) || {});
-    if (!no_ver) args.v_xpi = V;
+    if (!('v_xpi' in args)) args.v_xpi = V;
     args = param($refPrefs(args, win));
     return url + (args ? (/\?/.test(url) ? '&' : '?') + args : '');
   }
@@ -927,7 +1027,7 @@ try {
     var xhr = new XMLHttpRequest;
     xhr.mozBackgroundRequest = true; // no dialogs
     if (done) xhr.onload = xhr.onerror = done;
-    xhr.open(method, urlArgs(url, query, null, win), true);
+    xhr.open(method, urlArgs(url, query, win), true);
     if ('POST' === method)
       xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
     xhr.send(param(body));
@@ -944,9 +1044,10 @@ try {
              .replace(/%5B/g, '[').replace(/%5D/g, ']');
   }
 
-  function appPage(path, data, no_ver, win) {
-    var r = 'http://'+ userAppId().replace(/_/g, '-') +'.getsmartlinks.com/';
-    return urlArgs(r + (path || ''), data, no_ver, win);
+  function appPage(path, data, win, app_id) {
+    if (!app_id) app_id = userAppId();
+    var r = 'http://'+ app_id.replace(/_/g, '-') +'.getsmartlinks.com/';
+    return urlArgs(r + (path || ''), data, win);
   }
 
   function userAppId() {
@@ -966,7 +1067,7 @@ try {
     return appendIfMissing(PREFER, ADDON_ID);
   }
 
-  function registerApp() {
+  function registerApp() { try {
     var preferred = userPreferred(),
         not_today = updateKeypair(LAST, ADDON_ID, today()),
         new_addon = updateKeypair(EI2AI, ADDON_ID, APP_ID),
@@ -974,34 +1075,131 @@ try {
         max_int   = 0x7FFFFFFF,
         old_min   = getPref('min-version', max_int),
         old_max   = getPref('max-version', -1),
-        old_guid  = getPref(UID),
-        was_v4    = old_guid && !old_gte_v9,
-        min_v     = old_guid ? was_v4 ? 4 : old_min < max_int ? old_min : 9 : V;
+        old_user  = getPref(UID),
+        ask       = getPref(PROMPTS, 'from_v4'),
+        was_v4    = 'boolean' !== typeof ask,
+        min_v     = old_user ? was_v4 ? 4 : old_min < max_int ? old_min : 9 : V,
+        old_dev   = 'object' == typeof OLD,
+        old_prod  = 'string' == typeof OLD,
+        v4_window = OLD === true || (old_dev && 1668 === OLD.ns.length),
+        win_taken = v4_window || (ask != false && (old_dev || old_prod));
+
+    STATE.opt_in = 'opt_in' in STATE ? STATE.opt_in && OPT_IN : OPT_IN;
 
     setPref('min-version', Math.min(V, min_v));
     setPref('max-version', Math.max(V, old_max));
     updateKeypair('version', ADDON_ID, V);
 
-    if (new_addon && not_today)
-      newAddon(!old_guid);
+    if (ask) setPref(PROMPTS, false);
+    if (old_user && ask === 'from_v4')
+      setPref(SHOW_MENU, !!getPref(ENABLED));
+
+    ME = { V: V, APP_ID: APP_ID, OPT_IN: OPT_IN, ADDON_ID: ADDON_ID, init: init, abdicate: abdicate, pickMaster: pickMaster };
+
+    if (!win_taken ||
+        STATE.win_not_taken) {
+      window.getsmartlinks = window.getsmartlinks || V;
+      STATE.win_not_taken = true;
+      win_taken = false;
+    }
+
+    getGUID();
+
+    if (!old_user) {
+      STATE.new_user = true;
+      getExtensions(function newUser(extensions) {
+        var e = extensions.get(ADDON_ID)
+          , q = e ? { addon_ver: e.version, addon_name: e.name } : {};
+        track('new-user', extend({ addon_id: ADDON_ID }, q));
+      });
+    }
+    if (new_addon && not_today) {
+      var now = today(), next = now + 1;
+      appendIfMissing(NEW, { v_xpi: V, app_id: APP_ID, opt_in: +OPT_IN
+                           , addon_id: ADDON_ID, date: now, next: next });
+    }
+    if (V > old_max && !STATE.new_user) {
+      old_max = STATE.from_old = was_v4 ? 4 : old_min < max_int ? old_max : 9;
+      update('upgrade', content, null, { v_old: old_max, addon_id: ADDON_ID
+                                       , app_id: APP_ID, master: null });
+    }
+
+    if ((ME.active = !v4_window)) {
+      STATE.order = (STATE.order || []).concat(ME);
+      getExtensions(askForMaster, { ME: ME }, 'askForMaster v'+ V);
+    }
+    } catch(e) { error('registerApp error', e); }
+    return STATE;
   }
 
-  function newAddon(new_user) {
-    if (OPT_IN && !getPref(ENABLED)) {
-      promoteToFront(PREFER, ADDON_ID);
-      delPref(ENABLED);
-      delPref(SEEN_OPT);
+  function newAddons(ext_data, extensions, win) {
+    function stillInstalled(ext) { return extensions.has(ext.addon_id); }
+    function isOn(a) { a = extensions.get(a.addon_id); return a && a.enabled; }
+    function isNew(ext) { return !ext.tries; }
+    function isOptIn(ext) {    return 1 == ext.opt_in || true == ext.OPT_IN; }
+    function isNonOptIn(ext) { return 0 == ext.opt_in || false == ext.OPT_IN; }
+    function logNewAddons() {
+      var query = ext_data.filter(isNew).reduce(csvAttribs);
+      query.v_old = STATE.from_old;
+      update('new', content, null, query);
     }
-    else if (!OPT_IN) {
-      setPref(PROMPTS, false);
+
+    ext_data = ext_data.filter(stillInstalled);
+    var opt_in_exts     = ext_data.filter(isOptIn)
+      , opt_in_ext      = opt_in_exts[opt_in_exts.length - 1]
+      , non_opt_in_mode = STATE.order.some(isNonOptIn)
+      , new_non_opt_ins = ext_data.some(isNonOptIn);
+    if (new_non_opt_ins) {
       setPref(ENABLED, true);
+      setPref(SHOW_MENU, true);
+      delPref(NEW);
+      delPref(IS_OPTED_IN);
+      logNewAddons();
     }
-    setPref(SHOW_MENU, true);
-    if (new_user) track('new-user');
-    update('new', content);
+    else if (opt_in_ext && !opt_in_ext.hasOwnProperty('tries')) {
+      if (cantAskForOptIn())
+        delPref(NEW);
+      else {
+        opt_in_exts = opt_in_exts.map(function(x) { x.tries = 0; return x; });
+        opt_in_ext  = setPref(NEW, opt_in_exts).pop();
+        if (!(STATE.from_old || STATE.from_old > 9))
+          showOptIn(opt_in_ext);
+      }
+      logNewAddons();
+    }
+    else if (opt_in_ext && today() >= opt_in_ext.next) {
+      pollOrphans(opt_in_exts.filter(isOn), win);
+    }
   }
 
-  function pickActive(extensions, cause) {
+  function pollOrphans(exts, win) {
+    var me = exts[exts.length - 1];
+    if (me) me.tries++; else return;
+    var keep = /^(?:addon_id|app_id|date|tries|v_xpi)$/
+      , args = exts.map(partial(filterKeys, keep)).reduce(csvAttribs);
+    args.from = args.opt_in = undefined;
+    me.next = today() + 7;
+    setPref(NEW, exts);
+    update('orphans', win, null, args);
+  }
+
+  function filterKeys(re, object) {
+    var key, res = {};
+    for (key in object) if (re.test(key)) res[key] = object[key];
+    return res;
+  }
+
+  function csvAttribs(a, b) {
+    for (var key in a) {
+      a[key] += ','+ (key in b ? b[key] : '');
+      delete b[key];
+    }
+    for (key in b)
+      a[key] = ','+ b[key];
+    return a;
+  }
+
+  function pickPreferred(extensions, cause) {
     function isAncient(id) { return -1 !== dated_old.indexOf(id); }
     function isInactive(id) { // uninstalled, disabled, unsmartlinked?
       var addon = extensions.get(id);
@@ -1064,6 +1262,17 @@ try {
     return array;
   }
 
+  function removeFirst(id, value) {
+    var array = getPref(id, []), at = array.indexOf(value);
+    if (at < 0) return array;
+    array.splice(at, 1);
+    if (array.length)
+      setPref(id, array);
+    else
+      delPref(id);
+    return array;
+  }
+
   function promoteToFront(id, value, cause) {
     var array = getPref(id), at = array.indexOf(value), old = array[0];
     switch (at) {
@@ -1113,21 +1322,13 @@ try {
     return Application.activeWindow.open(uri);
   }
 
-  function inPrivateBrowsingMode(onChange) {
-    function togglePBM(aSubject, aTopic, aData) {
-      if ('private-browsing' === aTopic) onChange('enter' !== aData);
-    }
-
-    if (onChange)
-      svc('ObserverService').
-        addObserver({ observe: togglePBM }, 'private-browsing', false);
-
+  function inPrivateBrowsingMode() {
     try {
       return svc('PrivateBrowsingService').privateBrowsingEnabled;
     } catch(ex) {
       return false;
     }
   }
-})('undefined' !== typeof getsmartlinks && window.getsmartlinks);
+})(window.GetSmartLinks || {}, window.getsmartlinks);
 ]]></script>
 </overlay>
