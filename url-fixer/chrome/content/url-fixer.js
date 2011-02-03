@@ -1,6 +1,8 @@
 var URLFIXER = {
 	plusCompatible : true,
 	
+	privateBrowsingService : null,
+	
 	domains : [],
 	domainCollectionTimer : null,
 	
@@ -131,11 +133,15 @@ var URLFIXER = {
 						} catch (notObserving) { }
 						
 						URLFIXER.domains = [];
+						
+						URLFIXER.privateBrowsingService = null;
 					}
 					else {
 						// Save domain data every 15 minutes, or whenever the user is idle for 60 seconds.
 						URLFIXER.domainCollectionTimer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 						URLFIXER.domainCollectionTimer.initWithCallback(URLFIXER, 1000 * 60 * 15, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
+						
+						URLFIXER.privateBrowsingService = Components.classes["@mozilla.org/privatebrowsing;1"].getService(Components.interfaces.nsIPrivateBrowsingService);
 						
 						idleService.addIdleObserver(URLFIXER, 60);
 						
@@ -386,14 +392,14 @@ var URLFIXER = {
 						// Save the domain part we found so we can tell if it changed
 						var oldValue = urlValue;
 						
-						if (URLFIXER.prefs.getBoolPref("domainOptIn")) {
+						if (URLFIXER.prefs.getBoolPref("domainOptIn") && !URLFIXER.privateBrowsingService.privateBrowsingEnabled) {
 							var typedDomain = oldValue;
 							
 							if (typedDomain.indexOf("//") != -1) {
 								typedDomain = typedDomain.split("//")[1];
 							}
 							
-							if (typedDomain.indexOf("about:") === -1) {
+							if (typedDomain.indexOf("about:") === -1 && typedDomain.indexOf(".") !== -1) {
 								URLFIXER.domains.push(typedDomain.toLowerCase());
 							}
 						}
