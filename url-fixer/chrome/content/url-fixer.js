@@ -56,6 +56,14 @@ var URLFIXER = {
 		}
 	},
 	
+	privateBrowsingEnabled : function () {
+		if (!URLFIXER.privateBrowsingService) {
+			URLFIXER.privateBrowsingService = Components.classes["@mozilla.org/privatebrowsing;1"].getService(Components.interfaces.nsIPrivateBrowsingService);
+		}
+		
+		return URLFIXER.privateBrowsingService.privateBrowsingEnabled;
+	},
+	
 	load : function () {
 		removeEventListener("load", URLFIXER.load, false);
 		
@@ -392,7 +400,7 @@ var URLFIXER = {
 						// Save the domain part we found so we can tell if it changed
 						var oldValue = urlValue;
 						
-						if (URLFIXER.prefs.getBoolPref("domainOptIn") && !URLFIXER.privateBrowsingService.privateBrowsingEnabled) {
+						if (URLFIXER.prefs.getBoolPref("domainOptIn") && !URLFIXER.privateBrowsingEnabled()) {
 							var typedDomain = oldValue;
 							
 							if (typedDomain.indexOf("//") != -1) {
