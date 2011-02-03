@@ -1,0 +1,4 @@
+<!ENTITY urlFixer.options.title "URL Fixer - опције">
+<!ENTITY urlFixer.options.confirmCorrections "Увек ме прво питај за потврду поправки">
+<!ENTITY urlFixer.options.optIn "Дозволи URL Fixer-у да прати адресе које унесем, како би побољшао препознавање грешака.">
+<!ENTITY urlFixer.options.optIn.learnMore "Сазнај више о овој опцији.">

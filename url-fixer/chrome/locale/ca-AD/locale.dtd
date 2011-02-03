@@ -1,0 +1,4 @@
+<!ENTITY urlFixer.options.title "URL Fixer - Opcions">
+<!ENTITY urlFixer.options.confirmCorrections "Sempre confirma les correccions amb mi primer">
+<!ENTITY urlFixer.options.optIn "Permet a URL Fixer usar el que escric a la barra d'adreces per millorar la seva capacitat per corregir errors.">
+<!ENTITY urlFixer.options.optIn.learnMore "Més informació sobre aquesta opció.">

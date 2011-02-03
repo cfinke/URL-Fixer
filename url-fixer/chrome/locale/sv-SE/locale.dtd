@@ -1,2 +1,4 @@
 <!ENTITY urlFixer.options.title "Inställningar för URL Fixer">
 <!ENTITY urlFixer.options.confirmCorrections "Bekräfta alltid korrigeringar">
+<!ENTITY urlFixer.options.optIn "Tillåt att URL Fixer använder URL:erna jag skriver i adressfältet för att förbättra dess förmåga att rätta till fel.">
+<!ENTITY urlFixer.options.optIn.learnMore "Läs mer om detta alternativ.">

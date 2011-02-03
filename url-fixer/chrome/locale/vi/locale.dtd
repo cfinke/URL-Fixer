@@ -1,0 +1,4 @@
+<!ENTITY urlFixer.options.title "URL Fixer - Tùy chọn">
+<!ENTITY urlFixer.options.confirmCorrections "Luôn xác nhận sự sửa lỗi với tôi đầu tiên">
+<!ENTITY urlFixer.options.optIn "Cho phép URL Fixer sử dụng các URL tôi gõ ở thanh địa chỉ để nâng cao khả năng sửa lỗi.">
+<!ENTITY urlFixer.options.optIn.learnMore "Tìm hiểu thêm về tùy chọn này.">

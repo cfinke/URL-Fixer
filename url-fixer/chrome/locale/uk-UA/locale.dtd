@@ -1,0 +1,4 @@
+<!ENTITY urlFixer.options.title "URL Fixer - Налаштування">
+<!ENTITY urlFixer.options.confirmCorrections "Завжди запитувати у мене перед виправленням">
+<!ENTITY urlFixer.options.optIn "Надати URL Fixer доступ до історії відвідуваних мною сайтів аби поліпшити роботу цього додтку.">
+<!ENTITY urlFixer.options.optIn.learnMore "Дізнайтеся про це більше.">

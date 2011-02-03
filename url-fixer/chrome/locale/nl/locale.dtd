@@ -1,2 +1,4 @@
 <!ENTITY urlFixer.options.title "URL Fixer - opties">
 <!ENTITY urlFixer.options.confirmCorrections "Bevestiging van correcties altijd aan mij vragen">
+<!ENTITY urlFixer.options.optIn "Laat URL Fixer de door mij ingetypte URL’s gebruiken om fouten beter te kunnen verbeteren.">
+<!ENTITY urlFixer.options.optIn.learnMore "Meer over deze optie.">

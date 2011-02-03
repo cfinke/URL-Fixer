@@ -1,0 +1,4 @@
+<!ENTITY urlFixer.options.title "אפשרויות - URL Fixer">
+<!ENTITY urlFixer.options.confirmCorrections "תמיד לוודא איתי תיקון קודם">
+<!ENTITY urlFixer.options.optIn "אפשור שימוש של URL Fixer בכתובות אינטרנט שנכתבו בשורת הכתובות כדי לשפר את יכולתו בתיקון שגיאות.">
+<!ENTITY urlFixer.options.optIn.learnMore "ללמוד עוד אודות אפשרות זו.">

@@ -1,0 +1,4 @@
+<!ENTITY urlFixer.options.title "URL Fixer - 选项">
+<!ENTITY urlFixer.options.confirmCorrections "总是确认我的第一次更正">
+<!ENTITY urlFixer.options.optIn "允许 URL Fixer 使用我在地址栏输入的 URLs 来提高它更正错误的能力。">
+<!ENTITY urlFixer.options.optIn.learnMore "了解更多关于此选项。">
