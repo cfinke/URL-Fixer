@@ -541,46 +541,28 @@ var URLFIXER = {
 	},
 	
 	requestOptIn : function () {
-		var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
-
-		var check = { value: true };
-		var flags = 
-			prompts.BUTTON_TITLE_IS_STRING * prompts.BUTTON_POS_0 +
-			prompts.BUTTON_TITLE_IS_STRING * prompts.BUTTON_POS_1 +
-			prompts.BUTTON_TITLE_IS_STRING * prompts.BUTTON_POS_2 +
-			prompts.BUTTON_POS_1_DEFAULT;
+		var args = [ URLFIXER.strings.getString("urlfixer.optInTitle"), URLFIXER.strings.getString("urlfixer.optInDescription"),  URLFIXER.strings.getString("urlfixer.optInAccept"), URLFIXER.strings.getString("urlfixer.optInDecline"), URLFIXER.strings.getString("urlfixer.optInLater") ];
 		
-		var button = prompts.confirmEx(window, URLFIXER.strings.getString("urlfixer.optInTitle"), URLFIXER.strings.getString("urlfixer.optInDescription"), flags, URLFIXER.strings.getString("urlfixer.optInAccept"), URLFIXER.strings.getString("urlfixer.optInDecline"), URLFIXER.strings.getString("urlfixer.optInLater"), null, check);
-		
-		if (button == 2) {
-			// User chose "More Information"
-			
-			if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
-				Browser.addTab("http://data-urlfixer.efinke.com/", true);
-			}
-			else {
-				var browser = getBrowser();
-				browser.selectedTab = browser.addTab("http://data-urlfixer.efinke.com/");
-			}
-			
-			return false;
+		window.openDialog("chrome://url-fixer/content/optIn.xul", "urlFixerOptIn", "chrome,dialog,centerscreen,titlebar,alwaysraised", args);
+	},
+	
+	optInAccept : function () {
+		URLFIXER.prefs.setBoolPref("domainOptInAsk", true);
+		URLFIXER.prefs.setBoolPref("domainOptIn", true);
+	},
+	
+	optInCancel : function () {
+		URLFIXER.prefs.setBoolPref("domainOptInAsk", true);
+		URLFIXER.prefs.setBoolPref("domainOptIn", false);
+	},
+	
+	optInDisclosure : function () {
+		if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
+			Browser.addTab("http://data-urlfixer.efinke.com/", true);
 		}
 		else {
-			URLFIXER.prefs.setBoolPref("domainOptInAsk", true);
-		
-			if (button == 0){
-				// 0 == Yes
-				URLFIXER.prefs.setBoolPref("domainOptIn", true);
-				
-				return true;
-			}
-			else {
-				// button == 1
-				// 1 == No
-				URLFIXER.prefs.setBoolPref("domainOptIn", false);
-				
-				return false;
-			}
+			var browser = getBrowser();
+			browser.selectedTab = browser.addTab("http://data-urlfixer.efinke.com/");
 		}
 	},
 	

@@ -3,3 +3,10 @@
 
 <!ENTITY urlFixer.options.optIn "Allow URL Fixer to use the URLs I type in the URL bar to improve its ability to correct errors.">
 <!ENTITY urlFixer.options.optIn.learnMore "Learn more about this option.">
+
+<!ENTITY urlfixer.optInTitle "Help Make URL Fixer Better">
+<!ENTITY urlfixer.optInDescription "Can URL Fixer use the domain names that you type in the address bar to improve its typo-correcting ability?">
+<!ENTITY urlfixer.optInDescription2 "It's completely anonymous, and you can opt out at any time from URL Fixer's options window.">
+<!ENTITY urlfixer.optInAccept "Sure">
+<!ENTITY urlfixer.optInDecline "No Thanks">
+<!ENTITY urlfixer.optInLater "Tell Me More">

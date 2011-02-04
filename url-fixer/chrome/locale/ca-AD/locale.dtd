@@ -2,3 +2,10 @@
 <!ENTITY urlFixer.options.confirmCorrections "Sempre confirma les correccions amb mi primer">
 <!ENTITY urlFixer.options.optIn "Permet a URL Fixer usar el que escric a la barra d'adreces per millorar la seva capacitat per corregir errors.">
 <!ENTITY urlFixer.options.optIn.learnMore "Més informació sobre aquesta opció.">
+
+<!ENTITY urlfixer.optInTitle "Ajuda a fer URL Fixer millor">
+<!ENTITY urlfixer.optInDescription "Pot URL Fixer utilitzar els noms de domini que escrius a la barra d'adreces per millorar la seva capacitat per corregir errors tipogràfics?">
+<!ENTITY urlfixer.optInDescription2 "(Totes les dades es recullen de forma anònima, i pots optar a no fer-ho en qualsevol moment des de la finestra d'opcions.)">
+<!ENTITY urlfixer.optInAccept "Segur">
+<!ENTITY urlfixer.optInDecline "No , gràcies">
+<!ENTITY urlfixer.optInLater "Explica'm més">

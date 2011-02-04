@@ -2,3 +2,10 @@
 <!ENTITY urlFixer.options.confirmCorrections "Sempre confirme as correcções comigo primeiro">
 <!ENTITY urlFixer.options.optIn "Permitir que o URL Fixer utilize as URLs que eu digitar na barra de URL para melhorar a sua capacidade para corrigir erros.">
 <!ENTITY urlFixer.options.optIn.learnMore "Saiba mais sobre esta opção.">
+
+<!ENTITY urlfixer.optInTitle "Ajude a tornar melhor o URL Fixer">
+<!ENTITY urlfixer.optInDescription "Pode o URL Fixer usar os nomes dos domínio que são digitados na barra endereço para melhorar a sua capacidade de corrigir erros?">
+<!ENTITY urlfixer.optInDescription2 " (Todos os dados são coletados de forma anônima, e pode optar por sair a qualquer momento a partir do URL Fixer da janela de opções.)">
+<!ENTITY urlfixer.optInAccept "De Certeza">
+<!ENTITY urlfixer.optInDecline "Não, obrigado">
+<!ENTITY urlfixer.optInLater "Diga-me mais">

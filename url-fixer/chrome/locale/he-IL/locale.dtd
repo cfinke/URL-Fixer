@@ -2,3 +2,10 @@
 <!ENTITY urlFixer.options.confirmCorrections "תמיד לוודא איתי תיקון קודם">
 <!ENTITY urlFixer.options.optIn "אפשור שימוש של URL Fixer בכתובות אינטרנט שנכתבו בשורת הכתובות כדי לשפר את יכולתו בתיקון שגיאות.">
 <!ENTITY urlFixer.options.optIn.learnMore "ללמוד עוד אודות אפשרות זו.">
+
+<!ENTITY urlfixer.optInTitle "סיוע בעשיית URL Fixer טוב יותר">
+<!ENTITY urlfixer.optInDescription "האם URL Fixer יכול להשתמש בשמות המרחב שהוזנו לשורת הכתובות כדי לשפר את יכולת תיקון שגיאות הכתיב?">
+<!ENTITY urlfixer.optInDescription2 " (כל המידע נאסף בצורה אנונימית, וניתן לבטל ההרשמה בכל זמן דרך חלון האפשרויות של URL Fixer)">
+<!ENTITY urlfixer.optInAccept "בטח">
+<!ENTITY urlfixer.optInDecline "לא תודה">
+<!ENTITY urlfixer.optInLater "ספר לי עוד">

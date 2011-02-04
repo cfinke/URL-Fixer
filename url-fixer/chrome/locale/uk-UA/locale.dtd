@@ -2,3 +2,10 @@
 <!ENTITY urlFixer.options.confirmCorrections "Завжди запитувати у мене перед виправленням">
 <!ENTITY urlFixer.options.optIn "Надати URL Fixer доступ до історії відвідуваних мною сайтів аби поліпшити роботу цього додтку.">
 <!ENTITY urlFixer.options.optIn.learnMore "Дізнайтеся про це більше.">
+
+<!ENTITY urlfixer.optInTitle "Допоможи зробити URL Fixer ще ліпшим">
+<!ENTITY urlfixer.optInDescription "Чи може URL Fixer використовувати інтернет адреси, які ви набираєте, аби поліпшити свою здатність виправляти помилки?">
+<!ENTITY urlfixer.optInDescription2 " (Всі дані буде зібрано анонімно; ви зможете будь-коли відмовитися від цієї функції у налаштуваннях цього додатку)">
+<!ENTITY urlfixer.optInAccept "Гаразд">
+<!ENTITY urlfixer.optInDecline "Ні, дякую">
+<!ENTITY urlfixer.optInLater "Розкажіть мені більше">
