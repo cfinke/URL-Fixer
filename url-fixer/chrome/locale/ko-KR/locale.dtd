@@ -1,3 +1,8 @@
 <!ENTITY urlFixer.options.title "URL Fixer - 선택사항">
 <!ENTITY urlFixer.options.confirmCorrections "먼저 항상 교정사항을 확인">
 <!ENTITY urlFixer.options.optIn.learnMore "이 선택사항에 대해 더 알아보자.">
+
+<!ENTITY urlfixer.optInTitle "URL Fixer가 더 좋아지도록 돕기">
+<!ENTITY urlfixer.optInAccept "물론이죠">
+<!ENTITY urlfixer.optInDecline "괜찮습니다">
+<!ENTITY urlfixer.optInLater "좀 더 알려주세요">
