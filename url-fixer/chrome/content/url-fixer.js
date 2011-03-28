@@ -541,7 +541,7 @@ var URLFIXER = {
 	},
 	
 	requestOptIn : function () {
-		window.openDialog("chrome://url-fixer/content/optIn.xul", "urlFixerOptIn", "chrome,dialog,centerscreen,titlebar,alwaysraised");
+		window.openDialog("chrome://url-fixer/content/optIn.xul", "urlFixerOptIn", "chrome,dialog,centerscreen,titlebar");
 	},
 	
 	optInAccept : function () {
