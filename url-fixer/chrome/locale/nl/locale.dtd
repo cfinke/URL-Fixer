@@ -1,7 +1,3 @@
-<!ENTITY urlFixer.options.title "URL Fixer - opties">
-<!ENTITY urlFixer.options.confirmCorrections "Bevestiging van correcties altijd aan mij vragen">
-<!ENTITY urlFixer.options.optIn "Laat URL Fixer de door mij ingetypte URL’s gebruiken om fouten beter te kunnen verbeteren.">
-<!ENTITY urlFixer.options.optIn.learnMore "Meer over deze optie.">
 <!ENTITY urlfixer.optInTitle "Help URL Fixer beter te worden">
 <!ENTITY urlfixer.optInDescription "Mag URL Fixer de door u in de adresbalk ingetypte URL’s gebruiken om fouten beter te kunnen verbeteren?">
 <!ENTITY urlfixer.optInDescription2 "(Alle gegevens worden anoniem verzameld, en u kunt uw toestemming op elk moment intrekken via het optiesvenster van URL Fixer.)">

@@ -1,7 +1,3 @@
-<!ENTITY urlFixer.options.title "Opções do URL Fixer">
-<!ENTITY urlFixer.options.confirmCorrections "Sempre solicitar confirmação antes de corrigir">
-<!ENTITY urlFixer.options.optIn "Permitir que o URL Fixer use os endereços digitados no campo de endereço para aprimorar sua capacidade de corrigir erros.">
-<!ENTITY urlFixer.options.optIn.learnMore "Saiba mais sobre esta opção (em inglês)">
 <!ENTITY urlfixer.optInTitle "Ajude a Tornar o Url Fixer Melhor">
 <!ENTITY urlfixer.optInDescription "O URL Fixer pode usar os domínios dos endereços digitados no campo de endereço para aprimorar sua capacidade de corrigir erros?">
 <!ENTITY urlfixer.optInDescription2 "Isso é completamente anônimo e você pode desativar a qualquer momento nas opções do URL Fixer.">

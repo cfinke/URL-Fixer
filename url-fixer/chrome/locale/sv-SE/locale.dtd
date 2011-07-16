@@ -1,7 +1,3 @@
-<!ENTITY urlFixer.options.title "Inställningar för URL Fixer">
-<!ENTITY urlFixer.options.confirmCorrections "Bekräfta alltid korrigeringar">
-<!ENTITY urlFixer.options.optIn "Tillåt att URL Fixer använder URL:erna jag skriver i adressfältet för att förbättra dess förmåga att rätta till fel.">
-<!ENTITY urlFixer.options.optIn.learnMore "Läs mer om detta alternativ.">
 <!ENTITY urlfixer.optInTitle "Hjälp oss att göra URL Fixer bättre">
 <!ENTITY urlfixer.optInDescription "Tillåter du att URL Fixer använder domännamnen som du skriver i adressfältet för att förbättra dess förmåga att korrigera felstavningar?">
 <!ENTITY urlfixer.optInDescription2 "(All data samlas in anonymt och du kan välja bort att delta när du vill via URL Fixers inställningar.)">

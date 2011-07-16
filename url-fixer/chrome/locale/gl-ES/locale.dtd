@@ -1,7 +1,3 @@
-<!ENTITY urlFixer.options.title "Opcións do URL Fixer">
-<!ENTITY urlFixer.options.confirmCorrections "Sempre confirmarei as correccións en primeiro lugar">
-<!ENTITY urlFixer.options.optIn "Permitirlle ao URL Fixer usar os URL que escriba na barra de enderezos para mellorar a capacidade de corrixir erros.">
-<!ENTITY urlFixer.options.optIn.learnMore "Coñece máis sobre esta opción.">
 <!ENTITY urlfixer.optInTitle "Axuda a mellorar o URL Fixer.">
 <!ENTITY urlfixer.optInDescription "Pode o URL Fijador utilizar os nomes de dominio que escribes na barra de URL para mellorar a súa capacidade para corrixir erros tipográficos?">
 <!ENTITY urlfixer.optInDescription2 ":(Todos os datos recolleranse de forma anónima, e vostede pode optar en calquera momento na xanela de opcións do URL Fixer.)">

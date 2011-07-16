@@ -1,6 +1,3 @@
-<!ENTITY urlFixer.options.title "URL Fixer - Options">
-<!ENTITY urlFixer.options.confirmCorrections "Toujours me confirmer d'abord les corrections">
-<!ENTITY urlFixer.options.optIn.learnMore "En savoir plus à propos de cette option.">
 <!ENTITY urlfixer.optInTitle "Aidez-nous à améliorer URL Fixer">
 <!ENTITY urlfixer.optInAccept "Bien sûr">
 <!ENTITY urlfixer.optInDecline "Non merci">

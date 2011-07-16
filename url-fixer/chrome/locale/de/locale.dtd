@@ -1,7 +1,3 @@
-<!ENTITY urlFixer.options.title "URL Fixer - Optionen">
-<!ENTITY urlFixer.options.confirmCorrections "Korrekturen immer zuerst mit mir bestätigen">
-<!ENTITY urlFixer.options.optIn "Erlaube URL Fixer, die URLs, die ich in der Adresszeile tippe, zu benutzten, um seine Fähigkeit, Tippfehler zu korrigieren, zu verbessern.">
-<!ENTITY urlFixer.options.optIn.learnMore "Erfahre mehr über diese Option.">
 <!ENTITY urlfixer.optInTitle "Hilf mit, URL Fixer besser zu machen">
 <!ENTITY urlfixer.optInDescription "Darf URL Fixer die Domain Names, die du in der Adresszeile eingibst, benutzen, um seine Tippfehler-Korrekturfähigkeit zu verbessern?">
 <!ENTITY urlfixer.optInDescription2 "Es ist gänzlich anonym und du kannst jederzeit über das URL Fixer Optionen-Fenster aussteigen.">

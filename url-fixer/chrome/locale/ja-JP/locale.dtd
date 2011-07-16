@@ -1,7 +1,3 @@
-<!ENTITY urlFixer.options.title "URL Fixer - オプション">
-<!ENTITY urlFixer.options.confirmCorrections "常に修正を確認する">
-<!ENTITY urlFixer.options.optIn "URL Fixerの機能向上のためロケーションバーへのURL入力情報の使用を許可する">
-<!ENTITY urlFixer.options.optIn.learnMore "このオプションの詳細についてはこちらをご覧ください">
 <!ENTITY urlfixer.optInTitle "URL Fixerの機能向上への協力">
 <!ENTITY urlfixer.optInDescription "URL Fixerの機能向上のためロケーションバーに入力するドメイン名の情報を使用してもいいですか？">
 <!ENTITY urlfixer.optInDescription2 "送信される情報は完全に匿名です。また、URL Fixerのオプションからいつでも停止することができます。">

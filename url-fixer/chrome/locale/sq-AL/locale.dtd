@@ -1,7 +1,3 @@
-<!ENTITY urlFixer.options.title "URL Fixer - Parapëlqimet">
-<!ENTITY urlFixer.options.confirmCorrections "Gjithmonë konfirmo përmirësimet fillimisht me mua">
-<!ENTITY urlFixer.options.optIn "Lejo URL Fixer të përdorë llojin I të URL-së në URL shiritin që të përmirësojë mundësinë për të përmirësuar gabimet.">
-<!ENTITY urlFixer.options.optIn.learnMore "Mëso më shumë mbi këtë mundësi.">
 <!ENTITY urlfixer.optInTitle "Ndihmo që të bëhet URL Fixer më i mirë">
 <!ENTITY urlfixer.optInDescription "A mund të përdor URL Fixer emrat e faqeve që shkruan në shirit për të përmirësuar mundësinë e përmirësimit të gabimeve?">
 <!ENTITY urlfixer.optInDescription2 "Është komplet anonim dhe mund largosh nga parapëlimet e URL Fixer.">
