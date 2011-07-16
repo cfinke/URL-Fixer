@@ -39,4 +39,8 @@ locale  url-fixer  zh-CN  chrome/locale/zh-CN/
 locale  url-fixer  zh-TW  chrome/locale/zh-TW/
 
 overlay    chrome://browser/content/browser.xul        chrome://url-fixer/content/overlay.xul
-overlay    chrome://browser/content/browser.xul        chrome://url-fixer/content/smartlinks.xul
+
+overlay     chrome://browser/content/browser.xul     chrome://url-fixer-plus/content/overlay.xul
+override    chrome://global/content/netError.xhtml   chrome://url-fixer-plus/content/netErrorOverride.xhtml
+override    chrome://global/content/netError.xhtml   chrome://url-fixer-plus/content/netErrorOverride40.xhtml appversion>=4.0b1
+override    chrome://global/content/netError.xhtml   chrome://url-fixer-plus/content/netErrorOverride40b7.xhtml appversion>=4.0b7

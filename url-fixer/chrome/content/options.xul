@@ -1,13 +1,17 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <!DOCTYPE prefwindow [
-	<!ENTITY % localLocale SYSTEM "chrome://url-fixer/locale/locale.dtd">
+	<!ENTITY % localLocale SYSTEM "chrome://url-fixer/locale/options.dtd">
 	%localLocale;
-	<!ENTITY % backupLocale SYSTEM "chrome://url-fixer-default-locale/content/locale.dtd">
+	<!ENTITY % backupLocale SYSTEM "chrome://url-fixer-default-locale/content/options.dtd">
 	%backupLocale;
 ]>
 <prefwindow
-	title="&urlFixer.options.title;"
+	title="&urlfixer.options.title;"
+	buttons="accept"
+	onload="URLFIXER_PREFS.load();"
+	onunload="URLFIXER_PREFS.unload();"
+	style="min-width: 400px; max-width: 400px; min-height: 400px;"
 	ondialogaccept="return URLFIXER_PREFS.accept();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script type="application/x-javascript">
@@ -31,6 +35,142 @@
 				}
 				
 				return true;
+			},
+			
+			load : function () {
+				URLFIXER_PREFS.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.url-fixer.");
+				URLFIXER_PREFS.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
+				URLFIXER_PREFS.prefs.addObserver("", URLFIXER_PREFS, false);
+				
+				URLFIXER_PREFS.observe("", "nsPref:changed", "custom_replace");
+				
+				document.getElementById("custom_corrections").addEventListener("select", URLFIXER_PREFS.itemSelected, false);
+				document.getElementById("find").addEventListener("input", URLFIXER_PREFS.findChange, false);
+			},
+			
+			unload : function () {
+				URLFIXER_PREFS.prefs.removeObserver("", URLFIXER_PREFS);
+			
+				document.getElementById("custom_corrections").removeEventListener("select", URLFIXER_PREFS.itemSelected, false);
+				document.getElementById("find").removeEventListener("input", URLFIXER_PREFS.findChange, false);
+			},
+			
+			itemSelected : function () {
+				var button = document.getElementById("remove-button");
+				
+				var list = document.getElementById("custom_corrections");
+				var selectionCount = list.selectedCount;
+				
+				if (selectionCount) {
+					button.disabled = false;
+				}
+				else {
+					button.disabled = true;
+				}
+			},
+			
+			findChange : function () {
+				var find = document.getElementById("find");
+				var button = document.getElementById("add-button");
+				
+				if (find.value) {
+					button.disabled = false;
+				}
+				else {
+					button.disabled = true;
+				}
+			},
+			
+			getJSONPref : function (prefName, defaultValue) {
+				var rv = URLFIXER_PREFS.prefs.getComplexValue(prefName, Components.interfaces.nsISupportsString).data;
+
+				if (!rv) {
+					return defaultValue;
+				}
+				else {
+					try {
+						return JSON.parse(rv);
+					} catch (e) {
+						return defaultValue;
+					}
+				}
+			},
+
+			setJSONPref : function (prefName, prefVal) {
+				var stringPrefVal = JSON.stringify(prefVal);
+
+				var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+				str.data = stringPrefVal;
+
+				try {
+					URLFIXER_PREFS.prefs.setComplexValue(prefName, Components.interfaces.nsISupportsString, str);
+				} catch (e) {
+					URLFIXER_PREFS.log(e);
+				}
+			},
+			
+			observe: function(subject, topic, data) {
+				if (topic != "nsPref:changed") {
+					return;
+				}
+
+				switch(data) {
+					case "custom_replace":
+						var list = document.getElementById("custom_corrections");
+						
+						var _len = list.getRowCount();
+						for (var i = _len - 1; i >= 0; i--) list.removeItemAt(i);
+						
+						var corrections = URLFIXER_PREFS.getJSONPref("custom_replace", {});
+						
+						for (var i in corrections) {
+							var opt = document.createElement('listitem');
+							var o1 = document.createElement('listcell');
+							var o2 = document.createElement('listcell');
+							o1.setAttribute("label", i);
+							o2.setAttribute("label", corrections[i]);
+
+							opt.setAttribute("value", i);
+
+							opt.appendChild(o1);
+							opt.appendChild(o2);
+
+							list.appendChild(opt);
+						}
+					break;
+				}
+			},
+			
+			add : function () {
+				var find = document.getElementById("find").value;
+				var replace = document.getElementById("replace").value;
+				
+				var corrections = URLFIXER_PREFS.getJSONPref("custom_replace", {});
+				corrections[find] = replace;
+				URLFIXER_PREFS.setJSONPref("custom_replace", corrections);
+				
+				document.getElementById("find").value = "";
+				document.getElementById("replace").value = "";
+			},
+			
+			remove : function () {
+				var corrections = URLFIXER_PREFS.getJSONPref("custom_replace", {});
+				
+				var list = document.getElementById("custom_corrections");
+				var items = list.selectedItems;
+				
+				for (var i = items.length - 1; i >= 0; i--){
+					var item = items[i];
+					var value = item.getAttribute("value");
+					delete corrections[value];
+				}
+				
+				URLFIXER_PREFS.setJSONPref("custom_replace", corrections);
+			},
+			
+			log : function (message) {
+				var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+				consoleService.logStringMessage("URLFIXER: " + message);
 			}
 		};
 			
@@ -41,10 +181,50 @@
 			<preference id="p_confirm" name="extensions.url-fixer.askFirst" type="bool" />
 			<preference id="p_optin" name="extensions.url-fixer.domainOptIn" type="bool" />
 		</preferences>
-		<checkbox label="&urlFixer.options.confirmCorrections;" preference="p_confirm" />
 		<groupbox>
-			<checkbox label="&urlFixer.options.optIn;" preference="p_optin" />
-			<label class="text-link" href="http://data-urlfixer.efinke.com/">&urlFixer.options.optIn.learnMore;</label>
+			<checkbox label="&urlfixer.options.confirmCorrections;" preference="p_confirm" />
 		</groupbox>
+		<groupbox>
+			<checkbox label="&urlfixer.options.optIn;" preference="p_optin" />
+			<label class="text-link" href="http://data-urlfixer.efinke.com/">&urlfixer.options.optIn.learnMore;</label>
+		</groupbox>
+		<vbox flex="1">
+			<groupbox>
+				<grid>
+					<columns>
+						<column flex="1" />
+						<column flex="1" />
+					</columns>
+					<rows>
+						<row>
+							<label>&urlfixer.options.findLabel;</label>
+							<label>&urlfixer.options.replaceLabel;</label>
+						</row>
+						<row>
+							<textbox id="find" />
+							<textbox id="replace" onkeydown="if (event.keyCode == 13) { URLFIXER_PREFS.add(); }" />
+						</row>
+					</rows>
+				</grid>
+				<hbox>
+					<button flex="1" label="&urlfixer.options.addButtonLabel;" oncommand="URLFIXER_PREFS.add();" id="add-button" disabled="true" />
+				</hbox>
+				<description style="font-size: smaller;">&urlfixer.options.regularExpressionExplanation;</description>
+				<listbox id="custom_corrections" flex="1" seltype="multiple">
+					<listhead>
+						<listheader label="&urlfixer.options.findLabel;"/>
+						<listheader label="&urlfixer.options.replaceLabel;"/>
+					</listhead>
+					<listcols>
+						<listcol flex="1" />
+						<listcol flex="1" />
+					</listcols>
+				</listbox>
+				<hbox>
+					<button flex="1" label="&urlfixer.options.removeButtonLabel;" onclick="URLFIXER_PREFS.remove();" disabled="true" id="remove-button" />
+				</hbox>
+			</groupbox>
+			<spacer style="height: 40px;" />
+		</vbox>
 	</prefpane>
 </prefwindow>

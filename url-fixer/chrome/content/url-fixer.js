@@ -6,52 +6,56 @@ var URLFIXER = {
 	domains : [],
 	domainCollectionTimer : null,
 	
+	/**
+	 * Lazy strings getter.
+	 */
+	
 	strings : {
 		_backup : null,
 		_main : null,
-		
+
 		initStrings : function () {
-			if (!this._backup) { this._backup = document.getElementById("url-fixer-backup-bundle"); }
-			if (!this._main) { this._main = document.getElementById("url-fixer-bundle"); }
+			if (!this._backup) { this._backup = Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService).createBundle("chrome://url-fixer-default-locale/content/locale.properties"); }
+			if (!this._main) { this._main = Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService).createBundle("chrome://url-fixer/locale/locale.properties"); }
 		},
-		
+
 		getString : function (key) {
 			this.initStrings();
-			
+
 			var rv = "";
-			
+
 			try {
-				rv = this._main.getString(key);
+				rv = this._main.GetStringFromName(key);
 			} catch (e) {
 			}
-			
+
 			if (!rv) {
 				try {
-					rv = this._backup.getString(key);
+					rv = this._backup.GetStringFromName(key);
 				} catch (e) {
 				}
 			}
-			
+
 			return rv;
 		},
-		
+
 		getFormattedString : function (key, args) {
 			this.initStrings();
-			
+
 			var rv = "";
-			
+
 			try {
-				rv = this._main.getFormattedString(key, args);
+				rv = this._main.formatStringFromName(key, args, args.length);
 			} catch (e) {
 			}
-			
+
 			if (!rv) {
 				try {
-					rv = this._backup.getFormattedString(key, args);
+					rv = this._backup.formatStringFromName(key, args, args.length);
 				} catch (e) {
 				}
 			}
-			
+
 			return rv;
 		}
 	},
@@ -75,6 +79,8 @@ var URLFIXER = {
 			URLFIXER.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.url-fixer.");
 			URLFIXER.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
 			URLFIXER.prefs.addObserver("", URLFIXER, false);
+			
+			document.addEventListener("URLFixerNetErrorCorrection", URLFIXER.netErrorCorrection, false, true);
 			
 			addEventListener("unload", URLFIXER.unload, false);
 			
@@ -169,6 +175,75 @@ var URLFIXER = {
 	
 	notify : function (timer) {
 		URLFIXER.anonymousDataCollection();
+	},
+	
+	getJSONPref : function (prefName, defaultValue) {
+		var rv = URLFIXER.prefs.getComplexValue(prefName, Components.interfaces.nsISupportsString).data;
+		
+		if (!rv) {
+			return defaultValue;
+		}
+		else {
+			try {
+				return JSON.parse(rv);
+			} catch (e) {
+				return defaultValue;
+			}
+		}
+	},
+	
+	setJSONPref : function (prefName, prefVal) {
+		var stringPrefVal = JSON.stringify(prefVal);
+		
+		var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+		str.data = stringPrefVal;
+
+		try {
+			URLFIXER.prefs.setComplexValue(prefName, Components.interfaces.nsISupportsString, str);
+		} catch (e) {
+			URLFIXER.log(e);
+		}
+	},
+	
+	netErrorCorrection : function (evt) {
+		var button = evt.target;
+		var oldUrl = button.getAttribute("old");
+		var newUrl = button.getAttribute("new");
+		
+		if (newUrl.indexOf("http://") == -1 && newUrl.indexOf("https://") == -1) {
+			newUrl = oldUrl.split("//")[0] + "//" + newUrl;
+		}
+		
+		var rv = newUrl;
+		
+		var oldParts = oldUrl.split("://");
+		var newParts = newUrl.split("://");
+		
+		// Discard the protocol if they're the same.
+		if (oldParts[0] == newParts[0]) {
+			oldParts.shift();
+			newParts.shift();
+			oldUrl = "//" + oldParts.join("//");
+			newUrl = "//" + newParts.join("//");
+		}
+		
+		// Ignore www subdomain if both of them have it.
+		if (oldUrl.indexOf("//www.") != -1 && (oldUrl.indexOf("//www.") === newUrl.indexOf("//www."))) {
+			oldUrl = oldUrl.split("//www.")[1];
+			newUrl = newUrl.split("//www.")[1];
+		}
+		
+		// Ignore trailing slashes
+		if (oldUrl.charAt(oldUrl.length - 1) == "/" && newUrl.charAt(newUrl.length - 1) == "/") {
+			oldUrl = oldUrl.substr(0, oldUrl.length - 1);
+			newUrl = newUrl.substr(0, newUrl.length - 1);
+		}
+		
+		var corrections = URLFIXER.getJSONPref("custom_replace", {});
+		corrections[oldUrl] = newUrl;
+		URLFIXER.setJSONPref("custom_replace", corrections);
+		
+		content.location.href = rv;
 	},
 	
 	getVersion : function (callback) {
@@ -373,6 +448,29 @@ var URLFIXER = {
 							// Extra letter at the end or before the tld
 							{find: "\\..?(com|net|org|edu|mil|gov|aero|biz|coop|info|museum|name|pro|cat|jobs|mobi|travel).?$", replace : ".$1"}
 						];
+					
+						var custom_res = URLFIXER.getJSONPref("custom_replace", {});
+						
+						var fullUrl = this.value;
+						
+						// Apply all of the RE changes listed above
+						for (var i in custom_res) {
+							if (i.indexOf("re:") == 0) {
+								var replacement_object = {
+									"find" : i.replace(/^re:+/g, ""),//.replace(/\\/g, "\\\\"),
+									"replace" : custom_res[i]
+								};
+								
+								//alert(replacement_object.find);
+								
+								fullUrl = URLFIXER.applyRE(fullUrl, replacement_object);
+							}
+							else {
+								fullUrl = fullUrl.replace(i, custom_res[i]);
+							}
+						}
+						
+						this.value = fullUrl;
 					
 						var urlValue;
 					

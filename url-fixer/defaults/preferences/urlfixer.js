@@ -6,3 +6,5 @@ pref("extensions.url-fixer.version", "");
 pref("extensions.url-fixer.domainOptInAsk", false);
 pref("extensions.url-fixer.domainOptIn", false);
 pref("extensions.url-fixer.counter", 0);
+
+pref("extensions.url-fixer.custom_replace", "{}");

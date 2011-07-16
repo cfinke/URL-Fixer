@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "URL Fixer - Options">
+<!ENTITY urlfixer.options.findLabel "If I Type...">
+<!ENTITY urlfixer.options.replaceLabel "Replace It With...">
+<!ENTITY urlfixer.options.addButtonLabel "Add Correction">
+<!ENTITY urlfixer.options.regularExpressionExplanation "If you're familiar with regular expressions, you can use them for both the 'find' and 'replace' parameters.  Just prefix the 'If I Type' value with 're:' to signify that the string is a regular expression.">
+<!ENTITY urlfixer.options.removeButtonLabel "Remove Selected">
+<!ENTITY urlfixer.options.confirmCorrections "Always confirm corrections with me first">
+<!ENTITY urlfixer.options.optIn "Allow URL Fixer to use the URLs I type in the URL bar to improve its ability to correct errors.">
+<!ENTITY urlfixer.options.optIn.learnMore "Learn more about this option.">

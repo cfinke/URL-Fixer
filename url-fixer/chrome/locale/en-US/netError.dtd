@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "Typo?">
+<!ENTITY urlfixer.neterror.subheader "Did you reach this page because of a spelling error?  If so, what did you mean to type?">
+<!ENTITY urlfixer.neterror.buttonlabel "Save Correction and Go to New URL">
+<!ENTITY urlfixer.neterror.summary "URL Fixer will save this correction and automatically apply it in the future so that you never see this page again.">
