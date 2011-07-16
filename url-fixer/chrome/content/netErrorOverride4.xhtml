@@ -8,6 +8,8 @@
   <!ENTITY % netErrorDTD
     SYSTEM "chrome://global/locale/netError.dtd">
   %netErrorDTD;
+  <!-- Fallback in case netOffline.overrideLongDesc is not defined -->
+  <!ENTITY netOffline.overrideLongDesc "&netOffline.longDesc;">
   <!ENTITY % globalDTD
     SYSTEM "chrome://global/locale/global.dtd">
   %globalDTD;
@@ -66,8 +68,8 @@
     <!-- If the location of the favicon is changed here, the FAVICON_ERRORPAGE_URL symbol in
          toolkit/components/places/src/nsFaviconService.h should be updated. -->
     <link rel="icon" type="image/png" id="favicon" href="chrome://global/skin/icons/warning-16.png"/>
-    
-    <script type="application/x-javascript"><![CDATA[
+
+    <script type="application/javascript"><![CDATA[
       // Error url MUST be formatted like this:
       //   moz-neterror:page?e=error&u=url&d=desc
       //
@@ -124,7 +126,7 @@
           location.reload();
         } catch (e) {
           // We probably tried to reload a URI that caused an exception to
-          // occur;  e.g. a non-existent file.
+          // occur;  e.g. a nonexistent file.
         }
 
         buttonEl.disabled = true;
@@ -187,7 +189,13 @@
         if (className == "expertBadCert") {
           showSecuritySection();
         }
-        
+
+        if (err == "cspFrameAncestorBlocked") {
+          // Remove the "Try again" button for CSP frame ancestors violation, since it's
+          // almost certainly useless. (Bug 553180)
+          document.getElementById("errorTryAgain").style.display = "none";
+        }
+
         if (err == "nssBadCert") {
           // Remove the "Try again" button for security exceptions, since it's
           // almost certainly useless.
@@ -201,7 +209,7 @@
           var secOverride = document.getElementById("securityOverrideDiv");
           secOverride.parentNode.removeChild(secOverride);
         }
-        
+
         document.getElementById("url-fixer-intention").value = document.location.href;
       }
       
@@ -301,7 +309,6 @@
         button.setAttribute("new", newUrl);
         button.dispatchEvent(e);
       }
-
     ]]></script>
   </head>
 
@@ -333,12 +340,13 @@
         <h1 id="et_nssFailure2">&nssFailure2.title;</h1>
         <h1 id="et_nssBadCert">&nssBadCert.title;</h1>
         <h1 id="et_malwareBlocked">&malwareBlocked.title;</h1>
+        <h1 id="et_cspFrameAncestorBlocked">&cspFrameAncestorBlocked.title;</h1>
       </div>
       <div id="errorDescriptionsContainer">
         <div id="ed_generic">&generic.longDesc;</div>
         <div id="ed_dnsNotFound">&dnsNotFound.longDesc;</div>
-        <div id="ed_fileNotFound">&fileNotFound.longDesc;</div>
 
+        <div id="ed_fileNotFound">&fileNotFound.longDesc;</div>
         <div id="ed_malformedURI">&malformedURI.longDesc;</div>
         <div id="ed_protocolNotFound">&protocolNotFound.longDesc;</div>
         <div id="ed_connectionFailure">&connectionFailure.longDesc;</div>
@@ -346,9 +354,9 @@
         <div id="ed_redirectLoop">&redirectLoop.longDesc;</div>
         <div id="ed_unknownSocketType">&unknownSocketType.longDesc;</div>
         <div id="ed_netReset">&netReset.longDesc;</div>
-        <div id="ed_netOffline">&netOffline.longDesc;</div>
-        <div id="ed_netInterrupt">&netInterrupt.longDesc;</div>
+        <div id="ed_netOffline">&netOffline.overrideLongDesc;</div>
 
+        <div id="ed_netInterrupt">&netInterrupt.longDesc;</div>
         <div id="ed_deniedPortAccess">&deniedPortAccess.longDesc;</div>
         <div id="ed_proxyResolveFailure">&proxyResolveFailure.longDesc;</div>
         <div id="ed_proxyConnectFailure">&proxyConnectFailure.longDesc;</div>
@@ -357,8 +365,9 @@
         <div id="ed_nssFailure2">&nssFailure2.longDesc;</div>
         <div id="ed_nssBadCert">&nssBadCert.longDesc2;</div>
         <div id="ed_malwareBlocked">&malwareBlocked.longDesc;</div>
-      </div>
 
+        <div id="ed_cspFrameAncestorBlocked">&cspFrameAncestorBlocked.longDesc;</div>
+      </div>
     </div>
 
     <!-- PAGE CONTAINER (for styling purposes only) -->
@@ -367,10 +376,10 @@
       <!-- Error Title -->
       <div id="errorTitle">
         <h1 id="errorTitleText" />
+
       </div>
       
       <!-- LONG CONTENT (the section most likely to require scrolling) -->
-
       <div id="errorLongContent">
       
         <!-- Short Description -->
@@ -379,26 +388,26 @@
         </div>
 
         <!-- Long Description (Note: See netError.dtd for used XHTML tags) -->
+
         <div id="errorLongDesc" />
 
         <!-- Override section - For ssl errors only.  Removed on init for other
              error types.  -->
-
         <div id="securityOverrideDiv">
           <a id="securityOverrideLink" href="javascript:showSecuritySection();" >&securityOverride.linkText;</a>
-          <div id="securityOverrideContent" style="display: none;">&securityOverride.warningText;</div>
+          <div id="securityOverrideContent" style="display: none;">&securityOverride.warningContent;</div>
         </div>
       </div>
 
       <!-- Retry Button -->
-      <xul:button xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-                  id="errorTryAgain" label="&retry.label;" oncommand="retryThis(this);" />
-      
+
+      <button id="errorTryAgain" onclick="retryThis(this);">&retry.label;</button>
+
       <div style="margin-left: 80px; margin-top: 20px;" id="url-fixer-section">
         <h1>&urlfixer.neterror.title;</h1>
         <p style="overflow: auto; border-bottom: 1px solid ThreeDLightShadow; padding-bottom: 1em; font-size: 130%; white-space: pre-wrap;">&urlfixer.neterror.subheader;</p>
         <p><input type="text" id="url-fixer-intention" value="" style="width: 90%;" onkeyup="if (event.keyCode == 13) { urlFixerRetryThis(this); }" /></p>
-        <p><xul:button xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" label="&urlfixer.neterror.buttonlabel;" oncommand="urlFixerRetryThis(this);" /></p>
+        <p><button onclick="urlFixerRetryThis(this);">&urlfixer.neterror.buttonlabel;</button></p>
         <p>&urlfixer.neterror.summary;</p>
       </div>
     </div>
@@ -408,6 +417,7 @@
     - an onload handler. This is because error pages are loaded as
     - LOAD_BACKGROUND, which means that onload handlers will not be executed.
     -->
-    <script type="application/x-javascript">initPage();</script>
+    <script type="application/javascript">initPage();</script>
+
   </body>
 </html>
