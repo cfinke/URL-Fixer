@@ -310,7 +310,7 @@ var URLFIXER = {
 				}
 			}
 			
-			if (typeof Browser === 'undefined' && !URLFIXER.prefs.getBoolPref("domainOptInAsk") && !URLFIXER.prefs.getBoolPref("domainOptIn") && URLFIXER.prefs.getIntPref("counter") >= 3) {
+			if (typeof Browser === 'undefined' && !URLFIXER.prefs.getBoolPref("domainOptInAsk") && !URLFIXER.prefs.getBoolPref("domainOptIn") && URLFIXER.prefs.getIntPref("counter") >= 7) {
 				URLFIXER.requestOptIn();
 			}
 			
