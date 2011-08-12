@@ -505,7 +505,7 @@ var URLFIXER = {
 								typedDomain = typedDomain.split("//")[1];
 							}
 							
-							if (typedDomain.indexOf("about:") === -1 && typedDomain.indexOf(".") !== -1) {
+							if (typedDomain.indexOf("about:") === -1 && typedDomain.indexOf(".") !== -1 && typedDomain.indexOf("@") === -1) {
 								URLFIXER.domains.push(typedDomain.toLowerCase());
 							}
 						}
