@@ -223,8 +223,13 @@
           var secOverride = document.getElementById("securityOverrideDiv");
           secOverride.parentNode.removeChild(secOverride);
         }
-
-        document.getElementById("url-fixer-intention").value = document.location.href;
+        
+        if (!navigator.onLine) {
+          document.getElementById("url-fixer-section").style.display = "none";
+        }
+        else {
+          document.getElementById("url-fixer-intention").value = document.location.href;
+        }
       }
       
       function showSecuritySection() {
