@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "URL Fixer - 选项">
+<!ENTITY urlfixer.options.findLabel "如果我输入...">
+<!ENTITY urlfixer.options.replaceLabel "替换为...">
+<!ENTITY urlfixer.options.addButtonLabel "添加更正">
+<!ENTITY urlfixer.options.regularExpressionExplanation "如果您熟悉正则表达式，您可以使用它们作为&quot;查找&quot;和“替换”的参数。只需要在“如果我输入”值前加前缀“re:”来表明这个字符串是一个正则表达式。">
+<!ENTITY urlfixer.options.removeButtonLabel "移除所选">
+<!ENTITY urlfixer.options.confirmCorrections "有更正时总是先和我确认">
+<!ENTITY urlfixer.options.optIn "允许 URL Fixer 使用我输入到地址栏的域名来提高它更正错误的能力。">
+<!ENTITY urlfixer.options.optIn.learnMore "了解更多有关此选项。">

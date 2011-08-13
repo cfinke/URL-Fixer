@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "URL Fixer - опције">
+<!ENTITY urlfixer.options.findLabel "Ако укуцам...">
+<!ENTITY urlfixer.options.replaceLabel "замени са...">
+<!ENTITY urlfixer.options.addButtonLabel "Додај исправку">
+<!ENTITY urlfixer.options.regularExpressionExplanation "Ако познајете регуларне изразе, можете их користити за параметре „пронађи” и „замени”. Довољно је да на почетак додате вредност „If I Type” са „re:” да бисте то означили као регуларан израз.">
+<!ENTITY urlfixer.options.removeButtonLabel "Уклони изабрано">
+<!ENTITY urlfixer.options.confirmCorrections "Увек ме прво питај за исправке">
+<!ENTITY urlfixer.options.optIn "Дозволи додатку URL Fixer да користи списак адреса које уносим, како би побољшао аутоматско исправљање.">
+<!ENTITY urlfixer.options.optIn.learnMore "Сазнај више о овој опцији.">

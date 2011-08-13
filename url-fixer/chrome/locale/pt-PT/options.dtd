@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "URL Fixer - Opções">
+<!ENTITY urlfixer.options.findLabel "Se eu escrever,">
+<!ENTITY urlfixer.options.replaceLabel "Substituir com,">
+<!ENTITY urlfixer.options.addButtonLabel "Adicionar Correcção">
+<!ENTITY urlfixer.options.regularExpressionExplanation "Se esta familiarizado com expressões regulares, pode usar ambas para 'procurar' e 'subestituir' parametros. Para isso, adicione o prefixo 're:' ao valor 'Se eu escrever', o que significa que o texto é uma expressão regular.">
+<!ENTITY urlfixer.options.removeButtonLabel "Remover Seleccionado">
+<!ENTITY urlfixer.options.confirmCorrections "Confirmar sempre as correcções primeiro">
+<!ENTITY urlfixer.options.optIn "Permitir que o URL Fixer use as URLs que eu escreve na barra de endereço para melhor a correcção de erros.">
+<!ENTITY urlfixer.options.optIn.learnMore "Saber mais sobre esta opção.">

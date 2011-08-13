@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "タイプミス？">
+<!ENTITY urlfixer.neterror.subheader "このページが表示されたのはスペルミスがあったからですか？">
+<!ENTITY urlfixer.neterror.buttonlabel "修正を保存し新しいURLに移動する">
+<!ENTITY urlfixer.neterror.summary "URL Fixerはこの補正を保存し、再度このページを見ることがないように自動で補正します">

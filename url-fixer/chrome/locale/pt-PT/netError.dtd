@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "Erro de digitação?">
+<!ENTITY urlfixer.neterror.subheader "Chegou a esta pagina por um erro de ortografia? Se sim, o que queria realmente escrever?">
+<!ENTITY urlfixer.neterror.buttonlabel "Guardar a correcção e ir para um novo URL">
+<!ENTITY urlfixer.neterror.summary "URL Fixer vai guardar esta correcção e vai aplica-la automaticamente futuramente, assim nunca mais verá esta página.">

@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "URL Fixer - Tùy chọn">
+<!ENTITY urlfixer.options.findLabel "Nếu tôi gõ ...">
+<!ENTITY urlfixer.options.replaceLabel "Thay thế nó bằng ...">
+<!ENTITY urlfixer.options.addButtonLabel "Thêm sự sửa lỗi">
+<!ENTITY urlfixer.options.regularExpressionExplanation "Nếu bạn quen với cách thể hiện thông thường, bạn có thể sử dụng cả hai thông số 'tìm' và 'thay thế'. Chỉ cần để tiền tố 'lại:' trước giá trị 'Nếu tôi gõ' để biểu thị rằng chuỗi đó là một sự thể hiện thông thường.">
+<!ENTITY urlfixer.options.removeButtonLabel "Đã xóa bỏ những thứ được chọn">
+<!ENTITY urlfixer.options.confirmCorrections "Luôn hỏi ý kiến tôi trước về sự sửa lỗi">
+<!ENTITY urlfixer.options.optIn "Cho phép URL Fixer sử dụng các địa chỉ tôi gõ trên thanh địa chỉ để tăng cường khả năng sửa lỗi.">
+<!ENTITY urlfixer.options.optIn.learnMore "Xem thêm hướng dẫn về cách sử dụng tùy chọn này.">

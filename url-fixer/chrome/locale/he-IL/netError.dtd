@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "שגיאת כתיב?">
+<!ENTITY urlfixer.neterror.subheader "האם הגעתם לעמוד זה עקב שגיאת איות? אם כן, למה התכוונתם לכתוב?">
+<!ENTITY urlfixer.neterror.buttonlabel "שמירת התיקון ומעבר לכתובת חדשה">
+<!ENTITY urlfixer.neterror.summary "URL Fixer ישמור תיקון זה ויחיל אותו אוטומטית בעתיד כך שלא יוצג עמוד זה שוב.">

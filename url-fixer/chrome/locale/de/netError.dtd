@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "Tippfehler?">
+<!ENTITY urlfixer.neterror.subheader "Sind Sie auf dieser Seite gelandet, weil Sie sich verschrieben haben? Falls ja, was wollten Sie eingeben?">
+<!ENTITY urlfixer.neterror.buttonlabel "Korrektur speichern und zur neuen URL gehen">
+<!ENTITY urlfixer.neterror.summary "URL Fixer speichert diese Korrektur und wendet sie in Zukunft automatisch an, sodass Sie diese Seite nie wieder sehen.">

@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "URL Fixer - 선택사항">
+<!ENTITY urlfixer.options.findLabel "만약 다음과 같이 입력하면...">
+<!ENTITY urlfixer.options.replaceLabel "다음으로 대체...">
+<!ENTITY urlfixer.options.addButtonLabel "교정 추가">
+<!ENTITY urlfixer.options.regularExpressionExplanation "만약 귀하가 정규표현식에 익숙하다면, '검색'과 '대체'매개변수에 사용가능합니다.">
+<!ENTITY urlfixer.options.removeButtonLabel "선택한 것 삭제">
+<!ENTITY urlfixer.options.confirmCorrections "항상 먼저 교정내용을 확인하도록 함">
+<!ENTITY urlfixer.options.optIn "오류 교정 기능을 높이기 위해 내가 주소창에 입력한 것을 URL Fixer가 사용하도록 허용합니다.">
+<!ENTITY urlfixer.options.optIn.learnMore "이 선택사항에 대해 더 배우기.">

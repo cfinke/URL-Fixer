@@ -1,0 +1,8 @@
+<!ENTITY urlfixer.options.title "URL Fixer - אפשרויות">
+<!ENTITY urlfixer.options.findLabel "אם אני אכתוב...">
+<!ENTITY urlfixer.options.replaceLabel "החלף זאת עם...">
+<!ENTITY urlfixer.options.addButtonLabel "הוספת תיקון">
+<!ENTITY urlfixer.options.removeButtonLabel "הסרת הנבחר">
+<!ENTITY urlfixer.options.confirmCorrections "תמיד לוודא איתי קודם את התיקון">
+<!ENTITY urlfixer.options.optIn "אפשר ל-URL Fixer להשתמש בכתובות שאני מקליד בסרגל הכתובות כדי לשפר את יכולת תיקון השגיאות.">
+<!ENTITY urlfixer.options.optIn.learnMore "ללמוד עוד אודות אפשרות זו.">

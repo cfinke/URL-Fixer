@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "URL Fixer - opties">
+<!ENTITY urlfixer.options.findLabel "Als ik type…">
+<!ENTITY urlfixer.options.replaceLabel "Dit vervangen door…">
+<!ENTITY urlfixer.options.addButtonLabel "Correctie toevoegen">
+<!ENTITY urlfixer.options.regularExpressionExplanation "Als u bekend bent met reguliere expressies kunt u deze gebruiken voor zowel de parameters ‘zoeken’ als ‘vervangen’. Laat de waarde in ‘Als ik type…’ voorafgaan door ‘re:’ om aan te duiden dat de zin een reguliere expressie is.">
+<!ENTITY urlfixer.options.removeButtonLabel "Selectie verwijderen">
+<!ENTITY urlfixer.options.confirmCorrections "Correcties altijd door mij laten bevestigen">
+<!ENTITY urlfixer.options.optIn "URL Fixer toestaan om de door mij in de adresbalk ingetypte URL’s te gebruiken om de verbetermogelijkheden te vergroten.">
+<!ENTITY urlfixer.options.optIn.learnMore "Meer over deze optie.">

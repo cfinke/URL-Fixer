@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "Lỗi đánh máy?">
+<!ENTITY urlfixer.neterror.subheader "Bạn tới trang này vì gõ sai địa chỉ? Nếu thế thì bạn định gõ gì?">
+<!ENTITY urlfixer.neterror.buttonlabel "Lưu sự sửa lỗi và tới một địa chỉ mới">
+<!ENTITY urlfixer.neterror.summary "URL Fixer sẽ lưu sự sửa lỗi này và tự động áp dụng nó ở các lần sau để bạn không bao giờ bị chuyển tới trang này nữa.">

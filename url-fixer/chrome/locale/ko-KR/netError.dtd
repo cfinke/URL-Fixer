@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "오타입니까?">
+<!ENTITY urlfixer.neterror.subheader "맞춤법 오류로 이 페이지에 도착하진 않았나요? 만약, 그렇다면 어떤 뜻인지 입력해주시겠습니까?">
+<!ENTITY urlfixer.neterror.buttonlabel "교정 저장 후  새 URL로 가기">
+<!ENTITY urlfixer.neterror.summary "URL Fixer는 이 교정사항을 저장하고 차후에 귀하가 다시는 이 페이지를 보지 않도록 자동으로 적용할 겁니다.">

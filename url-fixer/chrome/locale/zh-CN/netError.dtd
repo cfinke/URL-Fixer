@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "输入错误？">
+<!ENTITY urlfixer.neterror.subheader "您来到这个页面是因为一个拼写错误？那么，您想输入的是什么呢？">
+<!ENTITY urlfixer.neterror.buttonlabel "保存更正并打开新的网址">
+<!ENTITY urlfixer.neterror.summary "URL Fixer 将保存这个更正并在将来自动运用它，因此您将不会再看到这个页面。">

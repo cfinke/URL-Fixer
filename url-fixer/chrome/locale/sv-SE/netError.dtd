@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "Stavfel?">
+<!ENTITY urlfixer.neterror.subheader "Kom du till den här sidan p.g.a. ett stavfel? Om så är fallet, vad var det du ville skriva?">
+<!ENTITY urlfixer.neterror.buttonlabel "Spara korrigering och gå till ny URL">
+<!ENTITY urlfixer.neterror.summary "URL Fixer kommer att spara denna korrigering och tillämpa den automatiskt i fortsättningen, så att du aldrig behöver se denna sida igen.">

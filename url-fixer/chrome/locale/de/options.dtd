@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "URL Fixer - Optionen">
+<!ENTITY urlfixer.options.findLabel "Diesen Ausdruck">
+<!ENTITY urlfixer.options.replaceLabel "Ersetzen mit">
+<!ENTITY urlfixer.options.addButtonLabel "Korrektur hinzufügen">
+<!ENTITY urlfixer.options.regularExpressionExplanation "Wenn Sie sich mit Regular Expressions auskennen, können Sie sie in den 'Finden' und 'Ersetzen' Parametern verwenden. Stellen Sie einfach dem 'Diesen Ausdruck'-Wert 're:' voran, um den String als Regular Expression zu kennzeichnen.">
+<!ENTITY urlfixer.options.removeButtonLabel "Ausgewählte entfernen">
+<!ENTITY urlfixer.options.confirmCorrections "Korrekturen immer erst von mir bestätigen lassen">
+<!ENTITY urlfixer.options.optIn "Erlaube URL Fixer, meine in der URL-Zeile eingegebenen URLs für die Verbesserung seiner Fehlerkorrekturfähigkeiten zu benutzen.">
+<!ENTITY urlfixer.options.optIn.learnMore "Mehr über diese Option erfahren.">

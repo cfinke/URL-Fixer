@@ -1,0 +1,4 @@
+<!ENTITY urlfixer.neterror.title "Грешка у куцању?">
+<!ENTITY urlfixer.neterror.subheader "Да ли сте погрешно откуцали? Ако јесте, шта се желели да напишете?">
+<!ENTITY urlfixer.neterror.buttonlabel "Сачувај исправке и иди на нову адресу">
+<!ENTITY urlfixer.neterror.summary "URL Fixer ће сачувати исправку и аутоматски је применити следећи пут.">

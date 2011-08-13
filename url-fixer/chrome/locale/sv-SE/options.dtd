@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "Inställningar för URL Fixer">
+<!ENTITY urlfixer.options.findLabel "Om jag skriver…">
+<!ENTITY urlfixer.options.replaceLabel "Ersätt det med…">
+<!ENTITY urlfixer.options.addButtonLabel "Lägg till korrigering">
+<!ENTITY urlfixer.options.regularExpressionExplanation "Om du är bekant med reguljära uttryck, så kan du använda dem både för &quot;sök&quot;- och &quot;ersätt&quot;-parametrarna. Bifoga bara prefixet &quot;re:&quot; till värdet för &quot;Om jag skriver…&quot; för att markera att strängen är ett reguljärt uttryck.">
+<!ENTITY urlfixer.options.removeButtonLabel "Ta bort markerade">
+<!ENTITY urlfixer.options.confirmCorrections "Bekräfta alltid korrigeringar.">
+<!ENTITY urlfixer.options.optIn "Tillåt att URL Fixer använder URL:erna jag skriver i adressfältet för att förbättra dess förmåga att korrigera fel.">
+<!ENTITY urlfixer.options.optIn.learnMore "Läs mer om detta alternativ.">

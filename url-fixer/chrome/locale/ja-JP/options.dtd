@@ -1,0 +1,9 @@
+<!ENTITY urlfixer.options.title "URL Fixer - オプション">
+<!ENTITY urlfixer.options.findLabel "次のように入力すると">
+<!ENTITY urlfixer.options.replaceLabel "に交換してください">
+<!ENTITY urlfixer.options.addButtonLabel "補正を追加">
+<!ENTITY urlfixer.options.regularExpressionExplanation "正規表現を知っているならば、値が'I型の場合'接頭辞'再：'文字列が正規表現であることを示すために&quot;置換&quot;と&quot;検索&quot;パラメータの両方で使用することができます。">
+<!ENTITY urlfixer.options.removeButtonLabel "選択したものを削除">
+<!ENTITY urlfixer.options.confirmCorrections "常に最初に修正を確認する">
+<!ENTITY urlfixer.options.optIn "URL Fixerのエラーの修正能力を向上させるためにURLバーに入力するURLを使用するのを許可する。">
+<!ENTITY urlfixer.options.optIn.learnMore "このオプションについてはこちらをご覧ください。">
