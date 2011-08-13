@@ -179,7 +179,7 @@
 	<prefpane id="general-pane">
 		<preferences>
 			<preference id="p_confirm" name="extensions.url-fixer.askFirst" type="bool" />
-			<preference id="p_optin" name="extensions.url-fixer.domainOptIn" type="bool" />
+			<preference id="p_optin" name="extensions.typed-it-collection.domainOptIn" type="bool" />
 		</preferences>
 		<groupbox>
 			<checkbox label="&urlfixer.options.confirmCorrections;" preference="p_confirm" />

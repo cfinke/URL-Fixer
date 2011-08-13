@@ -1,11 +1,6 @@
 var URLFIXER = {
 	plusCompatible : true,
 	
-	privateBrowsingService : null,
-	
-	domains : [],
-	domainCollectionTimer : null,
-	
 	/**
 	 * Lazy strings getter.
 	 */
@@ -60,12 +55,240 @@ var URLFIXER = {
 		}
 	},
 	
-	privateBrowsingEnabled : function () {
-		if (!URLFIXER.privateBrowsingService) {
-			URLFIXER.privateBrowsingService = Components.classes["@mozilla.org/privatebrowsing;1"].getService(Components.interfaces.nsIPrivateBrowsingService);
-		}
+	typedItCollector : {
+		handlerId : "urlfixer",
+		pathToResources : "chrome://url-fixer/content/typedit/",
 		
-		return URLFIXER.privateBrowsingService.privateBrowsingEnabled;
+		prefs : null,
+		
+		domains : [],
+		privateBrowsingService : null,
+		domainCollectionTimer : null,
+		
+		privateBrowsingEnabled : function () {
+			if (!this.privateBrowsingService) {
+				this.privateBrowsingService = Components.classes["@mozilla.org/privatebrowsing;1"].getService(Components.interfaces.nsIPrivateBrowsingService);
+			}
+
+			return this.privateBrowsingService.privateBrowsingEnabled;
+		},
+		
+		load : function () {
+			this.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.typed-it-collection.");
+			this.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
+			this.prefs.addObserver("", this, false);
+			
+			this.prefs.setCharPref("handler", this.handlerId);
+			
+			document.addEventListener("TypedItCollectorAllow", this.optInAccept, false, true);
+			document.addEventListener("TypedItCollectorDeny", this.optInCancel, false, true);
+			
+			this.observe("ignoreThisArgument", "nsPref:changed", "domainOptIn");
+		},
+		
+		unload : function () {
+			this.prefs.removeObserver("", this);
+			
+			if (this.prefs.getCharPref("handler") == this.handlerId) {
+				var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].getService(Components.interfaces.nsIIdleService)
+				try { idleService.removeIdleObserver(this, 60); } catch (notObserving) { }
+			
+				clearTimeout(this.domainCollectionTimer);
+			}
+			
+			document.removeEventListener("TypedItCollectorAllow", this.optInAccept, false, true);
+			document.removeEventListener("TypedItCollectorDeny", this.optInCancel, false, true);
+		},
+		
+		observe : function (subject, topic, data) {
+			var self = URLFIXER.typedItCollector;
+			
+			if (topic === "nsPref:changed") {
+				switch(data) {
+					case "domainOptIn":
+						if (self.prefs.getCharPref("handler") == self.handlerId) {
+							try {
+								self.domainCollectionTimer.cancel();
+							} catch (notActive) { }
+							
+							var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].getService(Components.interfaces.nsIIdleService)
+							
+							if (!self.prefs.getBoolPref("domainOptIn")) {
+								try {
+									idleService.removeIdleObserver(self, 60);
+								} catch (notObserving) { }
+
+								self.domains = [];
+
+								self.privateBrowsingService = null;
+
+								self.prefs.setIntPref("optedOutTimestamp", Math.round((new Date()).getTime() / 1000));
+							}
+							else {
+								// Save domain data every 15 minutes, or whenever the user is idle for 60 seconds.
+								self.domainCollectionTimer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+								self.domainCollectionTimer.initWithCallback(self, 1000 * 60 * 15, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
+							
+								self.privateBrowsingService = Components.classes["@mozilla.org/privatebrowsing;1"].getService(Components.interfaces.nsIPrivateBrowsingService);
+							
+								idleService.addIdleObserver(self, 60);
+							
+								self.prefs.setBoolPref("domainOptInAsk", true);
+								self.prefs.setIntPref("optedOutTimestamp", 0);
+								self.prefs.setBoolPref("initialized", true);
+							}
+						}
+					break;
+					case "domainOptInAsk":
+						if (self.prefs.getCharPref("handler") == self.handlerId) {
+							self.prefs.setBoolPref("initialized", true);
+						}
+					break;
+					case "handler":
+						var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].getService(Components.interfaces.nsIIdleService)
+						
+						if (self.prefs.getCharPref("handler") == self.handlerId) {
+							// We're now the handler.
+							if (self.prefs.getBoolPref("domainOptIn")) {
+								// Save domain data every 15 minutes, or whenever the user is idle for 60 seconds.
+								self.domainCollectionTimer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+								self.domainCollectionTimer.initWithCallback(self, 1000 * 60 * 15, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
+								
+								self.privateBrowsingService = Components.classes["@mozilla.org/privatebrowsing;1"].getService(Components.interfaces.nsIPrivateBrowsingService);
+								
+								idleService.addIdleObserver(self, 60);
+							}
+						}
+						else {
+							// We're now not the handler.
+							try {
+								self.domainCollectionTimer.cancel();
+							} catch (notActive) { }
+							
+							try {
+								idleService.removeIdleObserver(self, 60);
+							} catch (notObserving) { }
+							
+							self.domains = [];
+							
+							self.privateBrowsingService = null;
+						}
+					break;
+				}
+			}
+			else if (topic === "idle") {
+				self.anonymousDataCollection();
+			}
+		},
+		
+		firstRun : function () {
+			var self = URLFIXER.typedItCollector;
+		
+			if (typeof Browser === 'undefined') { // Don't do anything for Mobile.
+				if (self.prefs.getCharPref("handler") == self.handlerId) {
+					var counter = self.prefs.getIntPref("counter");
+				
+					if (counter < 5) {
+						counter++;
+				
+						self.prefs.setIntPref("counter", counter);
+					}
+					else if (!self.prefs.getBoolPref("domainOptInAsk") && !self.prefs.getBoolPref("domainOptIn")) {
+						self.requestOptIn();
+					}
+				}
+			}
+		},
+		
+		requestOptIn : function () {
+			var self = URLFIXER.typedItCollector;
+			
+			window.openDialog(self.pathToResources + "optIn.xul", "typedItOptIn", "chrome,dialog,centerscreen,titlebar");
+		},
+
+		optInAccept : function () {
+			var self = URLFIXER.typedItCollector;
+			
+			self.prefs.setBoolPref("domainOptInAsk", true);
+			self.prefs.setBoolPref("domainOptIn", true);
+		},
+
+		optInCancel : function () {
+			var self = URLFIXER.typedItCollector;
+			
+			self.prefs.setBoolPref("domainOptInAsk", true);
+			self.prefs.setBoolPref("domainOptIn", false);
+		},
+
+		optInDisclosure : function () {
+			var self = URLFIXER.typedItCollector;
+			
+			if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
+				Browser.addTab("http://data-" + self.handlerId + ".efinke.com/", true);
+			}
+			else {
+				var browser = getBrowser();
+				browser.selectedTab = browser.addTab("http://data-" + self.handlerId + ".efinke.com/");
+			}
+		},
+		
+		processDomain : function (typedDomain) {
+			var self = URLFIXER.typedItCollector;
+			
+			if (self.prefs.getBoolPref("domainOptIn") && self.prefs.getCharPref("handler") == self.handlerId && !self.privateBrowsingEnabled()) {
+				if (typedDomain.indexOf("//") != -1) {
+					typedDomain = typedDomain.split("//")[1];
+				}
+				
+				if (typedDomain.indexOf("about:") === -1 && typedDomain.indexOf(".") !== -1 && typedDomain.indexOf("@") === -1) {
+					self.domains.push(typedDomain.toLowerCase());
+				}
+			}
+		},
+		
+		/**
+		 * nsITimer callback.
+		 */
+		
+		notify : function (timer) {
+			var self = URLFIXER.typedItCollector;
+			
+			self.anonymousDataCollection();
+		},
+		
+		anonymousDataCollection : function () {
+			var self = URLFIXER.typedItCollector;
+			
+			if (self.prefs.getCharPref("handler") == self.handlerId) {
+				if (self.domains.length > 0 && self.prefs.getBoolPref("domainOptIn")) {
+					var argString = "";
+					
+					self.domains.forEach(function (el) {
+						argString += "domains[]=" + encodeURIComponent(el) + "&";
+					});
+					
+					argString += "app=" + self.handlerId;
+					
+					var theseDomains = self.domains;
+					self.domains = [];
+					
+					var req = new XMLHttpRequest();
+					req.open("POST", "http://data-" + self.handlerId + ".efinke.com/", true);
+					req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+					req.setRequestHeader("Content-Length", argString.length);
+					
+					req.onreadystatechange = function () {
+						if (req.readyState == 4) {
+							if (req.status != 200) {
+								self.domains = self.domains.concat(theseDomains);
+							}
+						}
+					};
+					
+					req.send(argString);
+				}
+			}
+		}
 	},
 	
 	load : function () {
@@ -80,11 +303,22 @@ var URLFIXER = {
 			URLFIXER.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
 			URLFIXER.prefs.addObserver("", URLFIXER, false);
 			
+			URLFIXER.typedItCollector.load();
+			
+			// Initialize the new shared prefs so we don't bug the user twice.
+			if (!URLFIXER.typedItCollector.prefs.getBoolPref("initialized") && !URLFIXER.typedItCollector.prefs.getBoolPref("domainOptInAsk") && URLFIXER.prefs.getBoolPref("domainOptInAsk")) {
+				URLFIXER.typedItCollector.prefs.setBoolPref("initialized", true);
+				URLFIXER.typedItCollector.prefs.setBoolPref("domainOptInAsk", true);
+				URLFIXER.typedItCollector.prefs.setBoolPref("domainOptIn", URLFIXER.prefs.getBoolPref("domainOptIn") || URLFIXER.typedItCollector.prefs.getBoolPref("domainOptIn"));
+				
+				if (URLFIXER.typedItCollector.prefs.getBoolPref("domainOptInAsk") && URLFIXER.typedItCollector.prefs.getBoolPref("domainOptIn")) {
+					URLFIXER.typedItCollector.prefs.setIntPref("optedOutTimestamp", Math.round((new Date()).getTime() / 1000));
+				}
+			}
+			
 			document.addEventListener("URLFixerNetErrorCorrection", URLFIXER.netErrorCorrection, false, true);
 			
 			addEventListener("unload", URLFIXER.unload, false);
-			
-			URLFIXER.observe("ignoreThisArgument", "nsPref:changed", "domainOptIn");
 			
 			setTimeout(URLFIXER.showFirstRun, 3000);
 		}
@@ -119,10 +353,7 @@ var URLFIXER = {
 		
 		URLFIXER.prefs.removeObserver("", URLFIXER);
 		
-		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].getService(Components.interfaces.nsIIdleService)
-		try { idleService.removeIdleObserver(URLFIXER, 60); } catch (notObserving) { }
-		
-		clearTimeout(URLFIXER.domainCollectionTimer);
+		URLFIXER.typedItCollector.unload();
 	},
 	
 	observe: function(subject, topic, data) {
@@ -134,47 +365,8 @@ var URLFIXER = {
 						document.getElementById("url-fixer-askFirst").setAttribute("checked", URLFIXER.prefs.getBoolPref("askFirst"));
 					}
 				break;
-				case "domainOptIn":
-					try {
-						URLFIXER.domainCollectionTimer.cancel();
-					} catch (notActive) { }
-				
-					var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].getService(Components.interfaces.nsIIdleService)
-				
-					if (!URLFIXER.prefs.getBoolPref("domainOptIn")) {
-						try {
-							idleService.removeIdleObserver(URLFIXER, 60);
-						} catch (notObserving) { }
-						
-						URLFIXER.domains = [];
-						
-						URLFIXER.privateBrowsingService = null;
-					}
-					else {
-						// Save domain data every 15 minutes, or whenever the user is idle for 60 seconds.
-						URLFIXER.domainCollectionTimer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-						URLFIXER.domainCollectionTimer.initWithCallback(URLFIXER, 1000 * 60 * 15, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
-						
-						URLFIXER.privateBrowsingService = Components.classes["@mozilla.org/privatebrowsing;1"].getService(Components.interfaces.nsIPrivateBrowsingService);
-						
-						idleService.addIdleObserver(URLFIXER, 60);
-						
-						URLFIXER.prefs.setBoolPref("domainOptInAsk", true);
-					}
-				break;
 			}
 		}
-		else if (topic === "idle") {
-			URLFIXER.anonymousDataCollection();
-		}
-	},
-	
-	/**
-	 * nsITimer callback.
-	 */
-	
-	notify : function (timer) {
-		URLFIXER.anonymousDataCollection();
 	},
 	
 	getJSONPref : function (prefName, defaultValue) {
@@ -268,13 +460,9 @@ var URLFIXER = {
 	
 	showFirstRun : function () {
 		function isMajorUpdate(version1, version2) {
-			return false;
-			
 			if (version1 == version2) {
 				return false;
 			}
-			
-			return true;
 			
 			if (!version1) {
 				return true;
@@ -282,7 +470,7 @@ var URLFIXER = {
 			else {
 				var oldParts = version1.split(".");
 				var newParts = version2.split(".");
-		
+				
 				if (newParts[0] != oldParts[0] || newParts[1] != oldParts[1]) {
 					return true;
 				}
@@ -296,24 +484,6 @@ var URLFIXER = {
 		}
 		
 		function doShowFirstRun(version) {
-			// We only want to make a request of upgrading users or users who have restarted Firefox at least 3 times.
-			if (isUpdate()) {
-				URLFIXER.prefs.setIntPref("counter", 3);
-			}
-			else {
-				var counter = URLFIXER.prefs.getIntPref("counter");
-				
-				if (counter < 3) {
-					counter++;
-				
-					URLFIXER.prefs.setIntPref("counter", counter);
-				}
-			}
-			
-			if (typeof Browser === 'undefined' && !URLFIXER.prefs.getBoolPref("domainOptInAsk") && !URLFIXER.prefs.getBoolPref("domainOptIn") && URLFIXER.prefs.getIntPref("counter") >= 7) {
-				URLFIXER.requestOptIn();
-			}
-			
 			if (isMajorUpdate(URLFIXER.prefs.getCharPref("version"), version)) {
 				if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
 					// Browser.addTab("http://www.chrisfinke.com/firstrun/url-fixer.php?v=" + version, true);
@@ -326,6 +496,8 @@ var URLFIXER = {
 			}
 			
 			URLFIXER.prefs.setCharPref("version", version);
+			
+			URLFIXER.typedItCollector.firstRun();
 		}
 		
 		URLFIXER.getVersion(doShowFirstRun);
@@ -461,8 +633,6 @@ var URLFIXER = {
 									"replace" : custom_res[i]
 								};
 								
-								//alert(replacement_object.find);
-								
 								fullUrl = URLFIXER.applyRE(fullUrl, replacement_object);
 							}
 							else {
@@ -498,17 +668,7 @@ var URLFIXER = {
 						// Save the domain part we found so we can tell if it changed
 						var oldValue = urlValue;
 						
-						if (URLFIXER.prefs.getBoolPref("domainOptIn") && !URLFIXER.privateBrowsingEnabled()) {
-							var typedDomain = oldValue;
-							
-							if (typedDomain.indexOf("//") != -1) {
-								typedDomain = typedDomain.split("//")[1];
-							}
-							
-							if (typedDomain.indexOf("about:") === -1 && typedDomain.indexOf(".") !== -1 && typedDomain.indexOf("@") === -1) {
-								URLFIXER.domains.push(typedDomain.toLowerCase());
-							}
-						}
+						URLFIXER.typedItCollector.processDomain(oldValue);
 						
 						// Lower case it to avoid making all REs case-insensitive
 						urlValue = urlValue.toLowerCase();
@@ -546,12 +706,18 @@ var URLFIXER = {
 									if (button == 0){
 										// User chose "Yes"
 										this.value = urlValue;
+										
+										// Consider this a 2nd typed domain.
+										URLFIXER.typedItCollector.processDomain(urlValue);
 									}
 								}
 							}
 							else {
 								// No confirmation needed
 								this.value = urlValue;
+								
+								// Consider this a 2nd typed domain.
+								URLFIXER.typedItCollector.processDomain(urlValue);
 							}
 						}
 						
@@ -636,57 +802,5 @@ var URLFIXER = {
 		}
 		
 		return string;
-	},
-	
-	requestOptIn : function () {
-		window.openDialog("chrome://url-fixer/content/optIn.xul", "urlFixerOptIn", "chrome,dialog,centerscreen,titlebar");
-	},
-	
-	optInAccept : function () {
-		URLFIXER.prefs.setBoolPref("domainOptInAsk", true);
-		URLFIXER.prefs.setBoolPref("domainOptIn", true);
-	},
-	
-	optInCancel : function () {
-		URLFIXER.prefs.setBoolPref("domainOptInAsk", true);
-		URLFIXER.prefs.setBoolPref("domainOptIn", false);
-	},
-	
-	optInDisclosure : function () {
-		if (typeof Browser != 'undefined' && typeof Browser.addTab != 'undefined') {
-			Browser.addTab("http://data-urlfixer.efinke.com/", true);
-		}
-		else {
-			var browser = getBrowser();
-			browser.selectedTab = browser.addTab("http://data-urlfixer.efinke.com/");
-		}
-	},
-	
-	anonymousDataCollection : function () {
-		if (URLFIXER.domains.length > 0 && URLFIXER.prefs.getBoolPref("domainOptIn")) {
-			var argString = "";
-			
-			URLFIXER.domains.forEach(function (el) {
-				argString += "domains[]=" + encodeURIComponent(el) + "&";
-			});
-			
-			URLFIXER.domains = [];
-			
-			var req = new XMLHttpRequest();
-			req.open("POST", "http://data-urlfixer.efinke.com/", true);
-			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-			req.setRequestHeader("Content-Length", argString.length);
-			
-			/*
-			req.onreadystatechange = function () {
-				if (req.readyState == 4) {
-					alert(req.status);
-					alert(req.responseText);
-				}
-			};
-			*/
-			
-			req.send(argString);
-		}
 	}
 };

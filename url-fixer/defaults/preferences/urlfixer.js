@@ -8,3 +8,10 @@ pref("extensions.url-fixer.domainOptIn", false);
 pref("extensions.url-fixer.counter", 0);
 
 pref("extensions.url-fixer.custom_replace", "{}");
+
+pref("extensions.typed-it-collection.initialized", false);
+pref("extensions.typed-it-collection.handler", "");
+pref("extensions.typed-it-collection.domainOptInAsk", false);
+pref("extensions.typed-it-collection.domainOptIn", false);
+pref("extensions.typed-it-collection.optedOutTimestamp", 0);
+pref("extensions.typed-it-collection.counter", 0);
