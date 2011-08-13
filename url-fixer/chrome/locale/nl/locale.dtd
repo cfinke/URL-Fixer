@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "Help URL Fixer beter te worden">
-<!ENTITY urlfixer.optInDescription "Mag URL Fixer de door u in de adresbalk ingetypte URL’s gebruiken om fouten beter te kunnen verbeteren?">
-<!ENTITY urlfixer.optInDescription2 "(Alle gegevens worden anoniem verzameld, en u kunt uw toestemming op elk moment intrekken via het optiesvenster van URL Fixer.)">
-<!ENTITY urlfixer.optInAccept "Natuurlijk">
-<!ENTITY urlfixer.optInDecline "Nee, bedankt">
-<!ENTITY urlfixer.optInLater "Meer hierover">
+<!ENTITY typedIt.optInTitle "Help URL Fixer beter te worden">
+<!ENTITY typedIt.optInDescription "Mag URL Fixer de door u in de adresbalk ingetypte URL’s gebruiken om fouten beter te kunnen verbeteren?">
+<!ENTITY typedIt.optInDescription2 "(Alle gegevens worden anoniem verzameld, en u kunt uw toestemming op elk moment intrekken via het optiesvenster van URL Fixer.)">
+<!ENTITY typedIt.optInAccept "Natuurlijk">
+<!ENTITY typedIt.optInDecline "Nee, bedankt">
+<!ENTITY typedIt.optInLater "Meer hierover">

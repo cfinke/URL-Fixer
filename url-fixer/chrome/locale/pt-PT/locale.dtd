@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "Ajude a tornar melhor o URL Fixer">
-<!ENTITY urlfixer.optInDescription "Pode o URL Fixer usar os nomes dos domínio que são digitados na barra endereço para melhorar a sua capacidade de corrigir erros?">
-<!ENTITY urlfixer.optInDescription2 " (Todos os dados são coletados de forma anônima, e pode optar por sair a qualquer momento a partir do URL Fixer da janela de opções.)">
-<!ENTITY urlfixer.optInAccept "De Certeza">
-<!ENTITY urlfixer.optInDecline "Não, obrigado">
-<!ENTITY urlfixer.optInLater "Diga-me mais">
+<!ENTITY typedIt.optInTitle "Ajude a tornar melhor o URL Fixer">
+<!ENTITY typedIt.optInDescription "Pode o URL Fixer usar os nomes dos domínio que são digitados na barra endereço para melhorar a sua capacidade de corrigir erros?">
+<!ENTITY typedIt.optInDescription2 " (Todos os dados são coletados de forma anônima, e pode optar por sair a qualquer momento a partir do URL Fixer da janela de opções.)">
+<!ENTITY typedIt.optInAccept "De Certeza">
+<!ENTITY typedIt.optInDecline "Não, obrigado">
+<!ENTITY typedIt.optInLater "Diga-me mais">

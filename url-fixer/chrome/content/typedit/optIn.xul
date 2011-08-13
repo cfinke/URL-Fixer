@@ -6,24 +6,24 @@
 	<!ENTITY % backupLocale SYSTEM "chrome://url-fixer-default-locale/content/locale.dtd">
 	%backupLocale;
 ]>
-<dialog title="&urlfixer.optInTitle;"
+<dialog title="&typedIt.optInTitle;"
 	id="typedit-opt-in-dialog"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	buttons="accept,cancel,disclosure"
 	ondialogaccept="opener.URLFIXER.typedItCollector.optInAccept(); return true;"
 	ondialogcancel="opener.URLFIXER.typedItCollector.optInCancel(); return true;"
 	ondialogdisclosure="opener.URLFIXER.typedItCollector.optInDisclosure(); window.close();"
-	buttonlabelaccept="&urlfixer.optInAccept;"
-	buttonlabelcancel="&urlfixer.optInDecline;"
-	buttonlabeldisclosure="&urlfixer.optInLater;"
+	buttonlabelaccept="&typedIt.optInAccept;"
+	buttonlabelcancel="&typedIt.optInDecline;"
+	buttonlabeldisclosure="&typedIt.optInLater;"
 	defaultButton="cancel">
 	<hbox>
 		<vbox>
 			<image src="chrome://url-fixer/skin/icon.gif" style="padding: 20px;"/>
 		</vbox>
 		<vbox style="width: 350px; padding-left: 20px;" align="center" pack="center">
-			<description>&urlfixer.optInDescription;</description>
-			<description>&urlfixer.optInDescription2;</description>
+			<description>&typedIt.optInDescription;</description>
+			<description>&typedIt.optInDescription2;</description>
 		</vbox>
 	</hbox>
 </dialog>

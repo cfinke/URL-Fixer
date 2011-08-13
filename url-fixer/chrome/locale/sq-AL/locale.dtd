@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "Ndihmo që të bëhet URL Fixer më i mirë">
-<!ENTITY urlfixer.optInDescription "A mund të përdor URL Fixer emrat e faqeve që shkruan në shirit për të përmirësuar mundësinë e përmirësimit të gabimeve?">
-<!ENTITY urlfixer.optInDescription2 "Është komplet anonim dhe mund largosh nga parapëlimet e URL Fixer.">
-<!ENTITY urlfixer.optInAccept "Sigurisht">
-<!ENTITY urlfixer.optInDecline "Jo Faleminderit">
-<!ENTITY urlfixer.optInLater "Më trego më shumë">
+<!ENTITY typedIt.optInTitle "Ndihmo që të bëhet URL Fixer më i mirë">
+<!ENTITY typedIt.optInDescription "A mund të përdor URL Fixer emrat e faqeve që shkruan në shirit për të përmirësuar mundësinë e përmirësimit të gabimeve?">
+<!ENTITY typedIt.optInDescription2 "Është komplet anonim dhe mund largosh nga parapëlimet e URL Fixer.">
+<!ENTITY typedIt.optInAccept "Sigurisht">
+<!ENTITY typedIt.optInDecline "Jo Faleminderit">
+<!ENTITY typedIt.optInLater "Më trego më shumë">

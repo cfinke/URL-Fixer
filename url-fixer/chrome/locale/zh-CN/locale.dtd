@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "帮助使 URL Fixer 更好">
-<!ENTITY urlfixer.optInDescription "URL Fixer 能使用您在地址栏输入的域名来提高它更正错误的能力吗?">
-<!ENTITY urlfixer.optInDescription2 "(所有数据都被匿名收集, 您可以在任何时候从 URL Fixer 的选项窗口中退出此计划.)">
-<!ENTITY urlfixer.optInAccept "确定">
-<!ENTITY urlfixer.optInDecline "不，谢谢">
-<!ENTITY urlfixer.optInLater "告诉我更多">
+<!ENTITY typedIt.optInTitle "帮助使 URL Fixer 更好">
+<!ENTITY typedIt.optInDescription "URL Fixer 能使用您在地址栏输入的域名来提高它更正错误的能力吗?">
+<!ENTITY typedIt.optInDescription2 "(所有数据都被匿名收集, 您可以在任何时候从 URL Fixer 的选项窗口中退出此计划.)">
+<!ENTITY typedIt.optInAccept "确定">
+<!ENTITY typedIt.optInDecline "不，谢谢">
+<!ENTITY typedIt.optInLater "告诉我更多">

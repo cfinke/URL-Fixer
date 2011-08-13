@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "Help Make URL Fixer Better">
-<!ENTITY urlfixer.optInDescription "Can URL Fixer use the domain names that you type in the address bar to improve its typo-correcting ability?">
-<!ENTITY urlfixer.optInDescription2 "It's completely anonymous, and you can opt out at any time from URL Fixer's options window.">
-<!ENTITY urlfixer.optInAccept "Sure">
-<!ENTITY urlfixer.optInDecline "No Thanks">
-<!ENTITY urlfixer.optInLater "Tell Me More">
+<!ENTITY typedIt.optInTitle "Help Make URL Fixer Better">
+<!ENTITY typedIt.optInDescription "Can URL Fixer use the domain names that you type in the address bar to improve its typo-correcting ability?">
+<!ENTITY typedIt.optInDescription2 "It's completely anonymous, and you can opt out at any time from URL Fixer's options window.">
+<!ENTITY typedIt.optInAccept "Sure">
+<!ENTITY typedIt.optInDecline "No Thanks">
+<!ENTITY typedIt.optInLater "Tell Me More">

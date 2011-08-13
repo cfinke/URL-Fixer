@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "Hilf mit, URL Fixer besser zu machen">
-<!ENTITY urlfixer.optInDescription "Darf URL Fixer die Domain Names, die du in der Adresszeile eingibst, benutzen, um seine Tippfehler-Korrekturfähigkeit zu verbessern?">
-<!ENTITY urlfixer.optInDescription2 "Es ist gänzlich anonym und du kannst jederzeit über das URL Fixer Optionen-Fenster aussteigen.">
-<!ENTITY urlfixer.optInAccept "Sicher">
-<!ENTITY urlfixer.optInDecline "Nein Danke.">
-<!ENTITY urlfixer.optInLater "Mehr erfahren">
+<!ENTITY typedIt.optInTitle "Hilf mit, URL Fixer besser zu machen">
+<!ENTITY typedIt.optInDescription "Darf URL Fixer die Domain Names, die du in der Adresszeile eingibst, benutzen, um seine Tippfehler-Korrekturfähigkeit zu verbessern?">
+<!ENTITY typedIt.optInDescription2 "Es ist gänzlich anonym und du kannst jederzeit über das URL Fixer Optionen-Fenster aussteigen.">
+<!ENTITY typedIt.optInAccept "Sicher">
+<!ENTITY typedIt.optInDecline "Nein Danke.">
+<!ENTITY typedIt.optInLater "Mehr erfahren">

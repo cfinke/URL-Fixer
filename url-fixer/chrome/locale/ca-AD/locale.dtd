@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "Ajuda a fer URL Fixer millor">
-<!ENTITY urlfixer.optInDescription "Pot URL Fixer utilitzar els noms de domini que escrius a la barra d'adreces per millorar la seva capacitat per corregir errors tipogràfics?">
-<!ENTITY urlfixer.optInDescription2 "(Totes les dades es recullen de forma anònima, i pots optar a no fer-ho en qualsevol moment des de la finestra d'opcions.)">
-<!ENTITY urlfixer.optInAccept "Segur">
-<!ENTITY urlfixer.optInDecline "No , gràcies">
-<!ENTITY urlfixer.optInLater "Explica'm més">
+<!ENTITY typedIt.optInTitle "Ajuda a fer URL Fixer millor">
+<!ENTITY typedIt.optInDescription "Pot URL Fixer utilitzar els noms de domini que escrius a la barra d'adreces per millorar la seva capacitat per corregir errors tipogràfics?">
+<!ENTITY typedIt.optInDescription2 "(Totes les dades es recullen de forma anònima, i pots optar a no fer-ho en qualsevol moment des de la finestra d'opcions.)">
+<!ENTITY typedIt.optInAccept "Segur">
+<!ENTITY typedIt.optInDecline "No , gràcies">
+<!ENTITY typedIt.optInLater "Explica'm més">

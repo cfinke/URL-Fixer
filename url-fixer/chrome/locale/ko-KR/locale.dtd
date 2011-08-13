@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "URL Fixer가 더 좋아지도록 돕기">
-<!ENTITY urlfixer.optInDescription "URL Fixer의 오타 교정 능력을 향상시키기 위해 귀하가 주소창에 입력한 도메인 명을 사용하도록 하시겠습니까?">
-<!ENTITY urlfixer.optInDescription2 "완전히 익명으로 처리되며, 언제든지 URL Fixer의 선택사항 창에서 기능을 해제할 수 있습니다.">
-<!ENTITY urlfixer.optInAccept "물론이죠">
-<!ENTITY urlfixer.optInDecline "괜찮습니다">
-<!ENTITY urlfixer.optInLater "좀 더 알려주세요">
+<!ENTITY typedIt.optInTitle "URL Fixer가 더 좋아지도록 돕기">
+<!ENTITY typedIt.optInDescription "URL Fixer의 오타 교정 능력을 향상시키기 위해 귀하가 주소창에 입력한 도메인 명을 사용하도록 하시겠습니까?">
+<!ENTITY typedIt.optInDescription2 "완전히 익명으로 처리되며, 언제든지 URL Fixer의 선택사항 창에서 기능을 해제할 수 있습니다.">
+<!ENTITY typedIt.optInAccept "물론이죠">
+<!ENTITY typedIt.optInDecline "괜찮습니다">
+<!ENTITY typedIt.optInLater "좀 더 알려주세요">

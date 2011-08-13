@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "Допоможи зробити URL Fixer ще ліпшим">
-<!ENTITY urlfixer.optInDescription "Чи може URL Fixer використовувати інтернет адреси, які ви набираєте, аби поліпшити свою здатність виправляти помилки?">
-<!ENTITY urlfixer.optInDescription2 " (Всі дані буде зібрано анонімно; ви зможете будь-коли відмовитися від цієї функції у налаштуваннях цього додатку)">
-<!ENTITY urlfixer.optInAccept "Гаразд">
-<!ENTITY urlfixer.optInDecline "Ні, дякую">
-<!ENTITY urlfixer.optInLater "Розкажіть мені більше">
+<!ENTITY typedIt.optInTitle "Допоможи зробити URL Fixer ще ліпшим">
+<!ENTITY typedIt.optInDescription "Чи може URL Fixer використовувати інтернет адреси, які ви набираєте, аби поліпшити свою здатність виправляти помилки?">
+<!ENTITY typedIt.optInDescription2 " (Всі дані буде зібрано анонімно; ви зможете будь-коли відмовитися від цієї функції у налаштуваннях цього додатку)">
+<!ENTITY typedIt.optInAccept "Гаразд">
+<!ENTITY typedIt.optInDecline "Ні, дякую">
+<!ENTITY typedIt.optInLater "Розкажіть мені більше">

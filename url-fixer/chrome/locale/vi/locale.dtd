@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "Giúp URL Fixer tốt hơn">
-<!ENTITY urlfixer.optInDescription "URL Fixer có thể sử dụng tên miền bạn gõ ở thanh địa chỉ để nâng cao khả năng sửa lỗi gõ của nó không?">
-<!ENTITY urlfixer.optInDescription2 "(Tất cả dữ liệu được thu thập nặc danh, và bạn có thể từ chối bất cứ lúc nào từ cửa sổ tùy chọn của URL Fixer.)">
-<!ENTITY urlfixer.optInAccept "Chắc chắn rồi">
-<!ENTITY urlfixer.optInDecline "Không, cảm ơn">
-<!ENTITY urlfixer.optInLater "Tìm hiểu thêm">
+<!ENTITY typedIt.optInTitle "Giúp URL Fixer tốt hơn">
+<!ENTITY typedIt.optInDescription "URL Fixer có thể sử dụng tên miền bạn gõ ở thanh địa chỉ để nâng cao khả năng sửa lỗi gõ của nó không?">
+<!ENTITY typedIt.optInDescription2 "(Tất cả dữ liệu được thu thập nặc danh, và bạn có thể từ chối bất cứ lúc nào từ cửa sổ tùy chọn của URL Fixer.)">
+<!ENTITY typedIt.optInAccept "Chắc chắn rồi">
+<!ENTITY typedIt.optInDecline "Không, cảm ơn">
+<!ENTITY typedIt.optInLater "Tìm hiểu thêm">

@@ -1,6 +1,6 @@
-<!ENTITY urlfixer.optInTitle "URL Fixerの機能向上への協力">
-<!ENTITY urlfixer.optInDescription "URL Fixerの機能向上のためロケーションバーに入力するドメイン名の情報を使用してもいいですか？">
-<!ENTITY urlfixer.optInDescription2 "送信される情報は完全に匿名です。また、URL Fixerのオプションからいつでも停止することができます。">
-<!ENTITY urlfixer.optInAccept "はい">
-<!ENTITY urlfixer.optInDecline "いいえ">
-<!ENTITY urlfixer.optInLater "詳細を表示する">
+<!ENTITY typedIt.optInTitle "URL Fixerの機能向上への協力">
+<!ENTITY typedIt.optInDescription "URL Fixerの機能向上のためロケーションバーに入力するドメイン名の情報を使用してもいいですか？">
+<!ENTITY typedIt.optInDescription2 "送信される情報は完全に匿名です。また、URL Fixerのオプションからいつでも停止することができます。">
+<!ENTITY typedIt.optInAccept "はい">
+<!ENTITY typedIt.optInDecline "いいえ">
+<!ENTITY typedIt.optInLater "詳細を表示する">
